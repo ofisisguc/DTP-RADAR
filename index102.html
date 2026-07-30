@@ -125,6 +125,21 @@ input[type=file]{display:none}
 .chip-visit input{accent-color:var(--imp)}
 .chip-visit:has(input:checked){border-color:var(--imp);color:var(--imp);background:rgba(232,163,61,.08)}
 .chip-visit[hidden]{display:none!important}
+/* Ziyaret Listem — bağımsız ekran */
+.visit-screen-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.visit-screen-title{font-family:'Sora',sans-serif;font-weight:700;font-size:19px;color:var(--text)}
+.visit-screen-tabs{display:inline-flex;background:var(--panel2);border:1px solid var(--border);border-radius:11px;padding:3px;margin-bottom:16px;gap:2px}
+.visit-tab{background:none;border:none;color:var(--muted);border-radius:8px;padding:8px 15px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:.15s}
+.visit-tab:hover{color:var(--text)}
+.visit-tab.active{background:var(--imp);color:#241700;font-weight:600}
+.visit-list-body{display:flex;flex-direction:column;gap:9px}
+.visit-item{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:13px 15px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.visit-item-main{flex:1;min-width:200px}
+.visit-item-name{font-weight:600;font-size:14px}
+.visit-item-addr{color:var(--muted);font-size:12px;margin-top:2px}
+.visit-item-date{color:var(--faint);font-size:11px;margin-top:4px}
+.visit-item-actions{display:flex;gap:8px;align-items:center;flex:0 0 auto}
+.visit-empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:13.5px}
 .filterbar select:focus,.filterbar input:focus{border-color:var(--exp)}
 /* katlanır admin paneli */
 .admin-panel{margin-top:34px;border:1px solid transparent;border-top:1px solid var(--border);border-radius:0;background:transparent;overflow:hidden;transition:background .25s ease,border-color .25s ease}
@@ -150,7 +165,7 @@ select:focus,input:focus{border-color:var(--exp)}
 .btn.primary:hover{filter:brightness(1.08)}
 .btn:disabled{opacity:.5;cursor:default}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
-.stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .stat .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .stat .v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;margin-top:3px}
 .stat .v.imp{color:var(--imp)} .stat .v.exp{color:var(--exp)}
@@ -192,8 +207,9 @@ select:focus,input:focus{border-color:var(--exp)}
 .leaflet-bar a:hover{background:var(--panel)}
 .leaflet-control-attribution{background:rgba(13,18,32,.7)!important;color:var(--faint)!important;font-size:9px}
 .leaflet-control-attribution a{color:var(--muted)!important}
-.firms{display:flex;flex-direction:column;gap:9px}
-.firm{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.firms{display:flex;flex-direction:column;gap:10px}
+.firm{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08);transition:box-shadow .18s,border-color .18s,transform .18s}
+.firm:hover{box-shadow:0 4px 16px rgba(0,0,0,.14);border-color:var(--axis)}
 .firm-top{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .firm-name{font-weight:600;font-size:14px;flex:1}
 .firm-dist{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--exp);white-space:nowrap}
@@ -215,6 +231,10 @@ select:focus,input:focus{border-color:var(--exp)}
 .visit-toggle-btn.visit-planned{opacity:1;background:rgba(232,163,61,.14);border-color:var(--imp)}
 .visit-toggle-btn.visit-done{opacity:1;background:rgba(53,196,168,.14);border-color:var(--exp)}
 .visit-badge{display:inline-block;margin-right:6px;font-size:13px}
+.visit-detail-btn{display:block;width:100%;margin-top:10px;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:11px 14px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+.visit-detail-btn:hover{border-color:var(--imp);color:var(--imp)}
+.visit-detail-btn.visit-planned{background:rgba(232,163,61,.1);border-color:var(--imp);color:var(--imp)}
+.visit-detail-btn.visit-done{background:rgba(53,196,168,.1);border-color:var(--exp);color:var(--exp)}
 .chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:8px 11px;font-size:13px;cursor:pointer;user-select:none;color:var(--muted)}
 .chip input{accent-color:#F0C560;cursor:pointer}
 .chip:has(input:checked){border-color:#F0C560;color:#F0C560;background:rgba(240,197,96,.08)}
@@ -255,7 +275,6 @@ select:focus,input:focus{border-color:var(--exp)}
 .firm-dist .prec{color:var(--exp)}
 .maps-link{display:inline-block;margin-top:10px;font-size:12.5px;color:var(--exp);text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;transition:.15s}
 .maps-link:hover{border-color:var(--exp);background:rgba(53,196,168,.08)}
-.firm{transition:border-color .15s}
 .firm.open{border-color:var(--exp)}
 .firm-head{cursor:pointer}
 .firm-caret{float:right;color:var(--faint);transition:transform .15s;display:inline-block}
@@ -578,10 +597,24 @@ select:focus,input:focus{border-color:var(--exp)}
   <label class="chip chip-diib" id="diibChip"><input type="checkbox" id="diibOnly"> 📄 DİİB</label>
   <label class="chip" id="timChip" style="display:none"><input type="checkbox" id="timOnly"> 🏆 İlk 1000</label>
   <label class="chip chip-tq" id="tqChip" style="display:none"><input type="checkbox" id="tqOnly"> 🎖️ Turquality</label>
-  <label class="chip chip-visit" id="visitChip" hidden><input type="checkbox" id="visitOnly"> 🔖 Ziyaret Listem</label>
+  <button class="chip chip-visit" id="visitListBtn" hidden type="button">🔖 Ziyaret Listem</button>
 </div>
 
 <!-- SONUÇLAR -->
+<!-- ZİYARET LİSTEM: ana listeden bağımsız, ayrı bir ekran -->
+<div id="visitListScreen" hidden>
+  <div class="visit-screen-header">
+    <div class="visit-screen-title">🔖 Ziyaret Listem</div>
+    <button class="btn" id="visitListCloseBtn">← Firma Listesine Dön</button>
+  </div>
+  <div class="visit-screen-tabs">
+    <button class="visit-tab active" id="visitTabAll" data-vtab="all">Tümü</button>
+    <button class="visit-tab" id="visitTabPlanned" data-vtab="planned">🔖 Planlanan</button>
+    <button class="visit-tab" id="visitTabDone" data-vtab="done">✅ Ziyaret Edilen</button>
+  </div>
+  <div id="visitListBody" class="visit-list-body"></div>
+</div>
+
 <div id="results" style="display:none">
   <div class="stats" id="stats"></div>
   <div class="toolrow">
@@ -681,6 +714,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     if (isLight){ document.documentElement.removeAttribute("data-theme"); localStorage.setItem("dtr-theme","dark"); }
     else { document.documentElement.setAttribute("data-theme","light"); localStorage.setItem("dtr-theme","light"); }
     sync();
+    if (typeof refreshMapTheme === "function") refreshMapTheme();
   };
 });
 
@@ -1241,10 +1275,6 @@ function filtered(){
   if ($("diibOnly") && $("diibOnly").checked) list = list.filter(a=>a.belge>0);
   if ($("timOnly") && $("timOnly").checked) list = list.filter(a=>a.tim);
   if ($("tqOnly") && $("tqOnly").checked) list = list.filter(a=>a.tq);
-  if ($("visitOnly") && $("visitOnly").checked && S.branch){
-    const vmap = S.visits[S.branch.username] || {};
-    list = list.filter(a=>vmap[a.key]);
-  }
   if (S.userLoc){
     const rad = $("radiusSel").value;
     if (rad) list = list.filter(a=>S.distByKey[a.key]!==undefined && S.distByKey[a.key]<=+rad);
@@ -1336,7 +1366,6 @@ function render(){
         <div class="firm-top"><div class="firm-name">${isStarredForBranch?`<span class="star-badge" title="Şubeniz için hedef firma">⭐</span>`:""}${isImportantForBranch?`<span class="important-badge" title="Sizin işaretlediğiniz önemli firma">📌</span>`:""}${adminViewImportant?`<span class="important-badge" title="Bu şube tarafından önemli işaretlenmiş">📌</span>`:""}${visitRec?`<span class="visit-badge visit-${visitRec.status}" title="${visitLabel}">${visitIcon}</span>`:""}${a.firma}${a.tim?`<span class="tim-badge" title="TİM İlk 1000 İhracatçı${S.timYear?' '+S.timYear:''}">🏆 İlk 1000${a.tim.r<9999?` · #${a.tim.r}`:''}</span>`:""}${a.tq?`<span class="tq-badge" title="${a.tq.prog||'Turquality/Marka Destek'}">🎖️ ${/TURQUALITY/i.test(a.tq.prog)?'Turquality':'Marka Destek'}</span>`:""}${(a.src&&a.src.tq&&!a.src.diib)?`<span class="only-tag" title="DİİB listesinde yok, Turquality havuzundan">Turquality</span>`:""}</div>
           <div class="firm-top-right">
             ${S.branch?`<button class="important-pin-toggle${isImportantForBranch?" marked":""}" data-important-key="${a.key}" title="${isImportantForBranch?'Önemli işaretini kaldır':'Önemli olarak işaretle'}">📌</button>`:""}
-            ${S.branch?`<button class="visit-toggle-btn${visitRec?" visit-"+visitRec.status:""}" data-visit-key="${a.key}" title="${visitLabel} (tıkla: değiştir)">${visitRec?visitIcon:"🔖"}</button>`:""}
             ${d!==undefined?`<div class="firm-dist" title="${precise?'Mahalle bazlı':'İlçe merkezine göre'}">≈ ${d<10?d.toFixed(1):Math.round(d)} km${precise?' <span class="prec">•</span>':''}</div>`:""}
           </div>
         </div>
@@ -1378,6 +1407,14 @@ function firmDetailHTML(a, mapsUrl){
       <div class="det-value${big?" big":""}">${value||"—"}</div>
       ${copyVal?`<button class="copy-btn" data-copy="${copyVal}" title="Kopyala">Kopyala</button>`:""}
     </div>`;
+  // Ziyaret Listesi durumu (şube kendi görünümünde, admin önizlerken de görebilir)
+  const visitRecBranch = S.branch && S.visits[S.branch.username] ? S.visits[S.branch.username][a.key] : null;
+  const visitRecAdminView = (!S.branch && S.isAdmin && S._starTargetBranch && S.visits[S._starTargetBranch]) ? S.visits[S._starTargetBranch][a.key] : null;
+  const visitRec = visitRecBranch || visitRecAdminView;
+  let visitBtnLabel, visitBtnClass;
+  if (!visitRec){ visitBtnLabel = "🔖 Ziyaret Listesine Ekle"; visitBtnClass = ""; }
+  else if (visitRec.status==="planned"){ visitBtnLabel = "🔖 Ziyaret Planlandı — Ziyaret Edildi Olarak İşaretle"; visitBtnClass = " visit-planned"; }
+  else { visitBtnLabel = "✅ Ziyaret Edildi — Listeden Kaldır"; visitBtnClass = " visit-done"; }
   return `<div class="firm-detail">
     ${a.tim?row("İlk 1000 İhracatçı", `<span class='tim-inline'>🏆 ${a.tim.r<9999?`Genel #${a.tim.r}`:'Listede'}${a.tim.s?` · Sektör #${a.tim.s}`:''}${S.timYear?` (${S.timYear})`:''}</span>`):""}
     ${a.tim&&a.tim.n?row("Sektör", a.tim.n):""}
@@ -1400,6 +1437,7 @@ function firmDetailHTML(a, mapsUrl){
       <a class="maps-link" href="${mapsUrl}" target="_blank" rel="noopener">📍 Yol tarifi</a>
       ${a.vkn?`<button class="copy-btn wide" data-copy="${a.vkn}">VKN'yi kopyala</button>`:""}
     </div>
+    ${S.branch?`<button class="visit-detail-btn${visitBtnClass}" data-visit-key="${a.key}">${visitBtnLabel}</button>`:""}
   </div>`;
 }
 
@@ -1423,7 +1461,7 @@ $("firmList").addEventListener("click", e=>{
     toggleImportantForBranch(impBtn.dataset.importantKey);
     return;
   }
-  const visitBtn = e.target.closest(".visit-toggle-btn");
+  const visitBtn = e.target.closest(".visit-toggle-btn, .visit-detail-btn");
   if (visitBtn){
     e.stopPropagation();
     toggleVisitForBranch(visitBtn.dataset.visitKey);
@@ -1435,6 +1473,12 @@ $("firmList").addEventListener("click", e=>{
     S._openFirm = (S._openFirm===k) ? null : k;
     render();
   }
+});
+
+// Ziyaret Listem ekranındaki butonlar için ayrı, sade tıklama yakalayıcı
+$("visitListBody") && $("visitListBody").addEventListener("click", e=>{
+  const btn = e.target.closest(".visit-detail-btn");
+  if (btn) toggleVisitForBranch(btn.dataset.visitKey);
 });
 
 // Yönetim panelinde seçili şube için firmayı yıldızla/kaldır, buluta kaydet
@@ -1486,11 +1530,67 @@ async function toggleVisitForBranch(firmKey){
   }
   S.visits = { ...S.visits, [uname]: current };
   render();
+  if (!$("visitListScreen").hidden) renderVisitListScreen();
   try{
     await fbDB.ref("visits/"+uname).set(current);
   }catch(e){
     toast("Ziyaret durumu kaydedilemedi: "+(e.message||e.code));
   }
+}
+
+// ---- Ziyaret Listem: ana listeden bağımsız ekran ----
+S._visitTab = "all"; // "all" | "planned" | "done"
+
+function openVisitListScreen(){
+  if (!S.branch) return;
+  $("results").style.display = "none";
+  $("visitListScreen").hidden = false;
+  renderVisitListScreen();
+}
+function closeVisitListScreen(){
+  const scr = $("visitListScreen");
+  if (scr) scr.hidden = true;
+  if (S.files.length || Object.keys(S.tq).length) $("results").style.display = "";
+}
+$("visitListBtn") && ($("visitListBtn").onclick = openVisitListScreen);
+$("visitListCloseBtn") && ($("visitListCloseBtn").onclick = closeVisitListScreen);
+["visitTabAll","visitTabPlanned","visitTabDone"].forEach(id=>{
+  const el = $(id);
+  if (!el) return;
+  el.onclick = ()=>{
+    S._visitTab = el.dataset.vtab;
+    document.querySelectorAll(".visit-tab").forEach(t=>t.classList.toggle("active", t===el));
+    renderVisitListScreen();
+  };
+});
+
+function renderVisitListScreen(){
+  const body = $("visitListBody");
+  if (!body || !S.branch) return;
+  const uname = S.branch.username;
+  const vmap = S.visits[uname] || {};
+  const all = aggregate(); // İlk1000/DİİB/Turquality mantığına dokunmadan mevcut firma havuzunu kullanır
+  const byKey = {}; for (const a of all) byKey[a.key] = a;
+  let entries = Object.entries(vmap).map(([key,rec])=>({ key, rec, firm: byKey[key] })).filter(e=>e.firm);
+  if (S._visitTab==="planned") entries = entries.filter(e=>e.rec.status==="planned");
+  else if (S._visitTab==="done") entries = entries.filter(e=>e.rec.status==="done");
+  entries.sort((a,b)=> (b.rec.ts||0)-(a.rec.ts||0));
+  if (!entries.length){
+    body.innerHTML = `<div class="visit-empty">Bu kategoride ziyaret kaydın yok. Bir firmanın detayını açıp "Ziyaret Listesine Ekle" ile başlayabilirsin.</div>`;
+    return;
+  }
+  const fmtDate = ts => ts ? new Date(ts).toLocaleString("tr-TR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "—";
+  body.innerHTML = entries.map(({key,rec,firm})=>`
+    <div class="visit-item">
+      <div class="visit-item-main">
+        <div class="visit-item-name">${rec.status==="done"?"✅":"🔖"} ${firm.firma}</div>
+        <div class="visit-item-addr">${firm.adres || firm.il || "—"}</div>
+        <div class="visit-item-date">${rec.status==="done"?"Ziyaret edildi":"Planlandı"} · ${fmtDate(rec.ts)}</div>
+      </div>
+      <div class="visit-item-actions">
+        <button class="visit-detail-btn${rec.status==="planned"?" visit-planned":" visit-done"}" data-visit-key="${key}" style="margin-top:0">${rec.status==="planned"?"✅ Edildi olarak işaretle":"🗑 Listeden kaldır"}</button>
+      </div>
+    </div>`).join("");
 }
 
 function copyText(text, btn){
@@ -1643,12 +1743,26 @@ function maybeAutoLocation(){
   setTimeout(requestLocation, 600);
 }
 
+function currentMapTileUrl(){
+  const isLight = document.documentElement.getAttribute("data-theme")==="light";
+  return isLight
+    ? "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+}
+
 function initMap(){
   if (S.map){ setTimeout(()=>S.map.invalidateSize(), 60); return; }
   S.map = L.map("map", {scrollWheelZoom:true}).setView([S.userLoc.lat,S.userLoc.lon], 9);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{attribution:"© OpenStreetMap © CARTO", subdomains:"abcd", maxZoom:19}).addTo(S.map);
+  S.mapTileLayer = L.tileLayer(currentMapTileUrl(), {attribution:"© OpenStreetMap © CARTO", subdomains:"abcd", maxZoom:19}).addTo(S.map);
   // Konteyner display:none iken oluşturulduysa boyutu 0 kalır; görünür olunca düzelt.
   setTimeout(()=>S.map.invalidateSize(), 120);
+}
+
+// Tema değiştiğinde harita zaten açıksa karo setini de güncelle (koyu <-> açık)
+function refreshMapTheme(){
+  if (!S.map || !S.mapTileLayer) return;
+  S.map.removeLayer(S.mapTileLayer);
+  S.mapTileLayer = L.tileLayer(currentMapTileUrl(), {attribution:"© OpenStreetMap © CARTO", subdomains:"abcd", maxZoom:19}).addTo(S.map);
 }
 
 function drawMap(list){
@@ -1842,18 +1956,19 @@ function applyAdminBranchPreview(uname){
 function renderBranchUI(){
   const badge=$("branchBadge");
   const adminPicker = $("adminBranchPicker");
-  const visitChip = $("visitChip");
+  const visitBtn = $("visitListBtn");
   if (S.branch){
     badge.hidden = false;
     $("branchBadgeName").textContent = S.branch.name;
     $("locSrcBranch").hidden = false;
     if (adminPicker) adminPicker.hidden = true; // güvence: şube kullanıcısı Şube Seç'i asla görmesin
-    if (visitChip) visitChip.hidden = false;
+    if (visitBtn) visitBtn.hidden = false;
     setLocSource("branch");
   } else {
     badge.hidden = true;
     $("locSrcBranch").hidden = true;
-    if (visitChip){ visitChip.hidden = true; if($("visitOnly")) $("visitOnly").checked=false; }
+    if (visitBtn) visitBtn.hidden = true;
+    closeVisitListScreen();
     setLocSource("gps");
   }
 }
@@ -2138,7 +2253,7 @@ $("saveTqBtn").onclick = async ()=>{
 };
 
 // Filtre kutucukları değişince
-document.addEventListener("change", e=>{ if(e.target && (e.target.id==="diibOnly"||e.target.id==="timOnly"||e.target.id==="tqOnly"||e.target.id==="visitOnly")){ S.shown=50; render(); } });
+document.addEventListener("change", e=>{ if(e.target && (e.target.id==="diibOnly"||e.target.id==="timOnly"||e.target.id==="tqOnly")){ S.shown=50; render(); } });
 
 // Başlat
 if (window.firebase && firebaseConfig.apiKey){ initFirebase(); }
