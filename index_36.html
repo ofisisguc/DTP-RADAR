@@ -173,6 +173,57 @@ input[type=file]{display:none}
 .admin-sum-status{font-size:11px;color:var(--faint);font-family:'IBM Plex Mono',monospace;opacity:.7}
 .admin-body{padding:2px 16px 16px;animation:adminFade .25s ease}
 @keyframes adminFade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+/* Yönetim ana ekranı: iki büyük sekme kartı */
+.admin-hub{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.admin-hub-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:22px 20px;text-align:left;cursor:pointer;transition:border-color .18s ease,transform .18s ease,background .18s ease}
+.admin-hub-card:hover{border-color:var(--exp);background:rgba(53,196,168,.05);transform:translateY(-2px)}
+.admin-hub-icon{font-size:26px}
+.admin-hub-title{font-family:'Sora',sans-serif;font-weight:700;font-size:15.5px;color:var(--text)}
+.admin-hub-desc{font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:640px){ .admin-hub{grid-template-columns:1fr} }
+
+/* Alt ekranlar (Şubeleri Yönet / Hedef Kitleleri Yönet) */
+.admin-screen{margin-top:6px}
+.admin-back-btn{background:none;border:none;color:var(--faint);font-size:12px;cursor:pointer;padding:4px 0 14px;display:block;transition:color .15s}
+.admin-back-btn:hover{color:var(--exp)}
+.admin-screen-title{font-family:'Sora',sans-serif;font-weight:700;font-size:17px;margin-bottom:16px}
+.admin-subhead{font-family:'Sora',sans-serif;font-weight:600;font-size:13.5px;margin-top:26px;margin-bottom:8px;color:var(--text)}
+
+/* Şube sınıflandırma sekmeleri */
+.branch-class-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.branch-class-tab{background:var(--panel2);border:1px solid var(--border);color:var(--muted);border-radius:9px;padding:8px 13px;font-family:inherit;font-size:12.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;transition:.15s}
+.branch-class-tab:hover{border-color:var(--axis)}
+.branch-class-tab.active{background:rgba(53,196,168,.1);border-color:var(--exp);color:var(--exp);font-weight:600}
+.bct-count{background:var(--panel);border-radius:8px;padding:1px 6px;font-size:10.5px;font-family:'IBM Plex Mono',monospace}
+.branch-class-tab.active .bct-count{background:rgba(53,196,168,.18)}
+
+/* Şube listesi tablosu */
+.branch-list-table{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto}
+.branch-list-row{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-size:12.5px}
+.branch-list-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.branch-list-tag{flex:0 0 auto;font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.03em}
+.branch-list-tag.ticari{background:rgba(124,131,253,.14);color:#A9AEFF}
+.branch-list-tag.kurumsal{background:rgba(232,163,61,.14);color:var(--imp)}
+.branch-list-tag.kobi{background:rgba(53,196,168,.14);color:var(--exp)}
+.branch-list-stat{flex:0 0 auto;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faint);white-space:nowrap}
+
+/* Hedef Kitleleri Yönet: kaynak kartları */
+.audience-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:16px}
+.audience-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:16px}
+.audience-card-title{font-family:'Sora',sans-serif;font-weight:600;font-size:13.5px;margin-bottom:6px}
+
+/* Firma listesi + manuel birleştirme */
+.merge-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0}
+.merge-toolbar input[type=search]{flex:1;min-width:180px;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px}
+.merge-selected-hint{font-size:11.5px;color:var(--faint)}
+.merge-firm-list{display:flex;flex-direction:column;gap:5px;max-height:380px;overflow-y:auto}
+.merge-firm-row{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;font-size:12.5px;cursor:pointer;transition:.12s}
+.merge-firm-row:hover{border-color:var(--axis)}
+.merge-firm-row.selected{border-color:var(--exp);background:rgba(53,196,168,.08)}
+.merge-firm-row input[type=checkbox]{accent-color:var(--exp);cursor:pointer;flex:0 0 auto}
+.merge-firm-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.merge-firm-src{flex:0 0 auto;font-size:10px;color:var(--faint);font-family:'IBM Plex Mono',monospace}
 .controls label{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
 select,input[type=search],input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:9px 10px;font-family:inherit;font-size:14px;outline:none}
 select:focus,input:focus{border-color:var(--exp)}
@@ -723,42 +774,32 @@ select:focus,input:focus{border-color:var(--exp)}
       <button class="btn" id="authBtn" style="display:none">Giriş yap</button>
     </div>
     <div id="uploadCard" style="display:none">
-      <div class="hint" style="margin-top:12px">ticaret.gov.tr &rsaquo; Belge Listeleri (D1, D3, H1) sayfasından her ayın <b>Dahilde İşleme İzin Belgeleri (D1)</b> Excel'ini indirip ekle. Ay otomatik algılanır; sonra <b>Buluta kaydet</b> ile herkese açılır.</div>
-      <div class="drop" id="drop"><b>Dosya seç</b> veya sürükle (.xlsx / .xls / .csv)</div>
-      <input type="file" id="fileInput" multiple accept=".xlsx,.xls,.csv">
-      <div class="filelist" id="fileList"></div>
-      <div class="saverow" id="saveRow" style="display:none">
-        <button class="btn primary" id="saveCloudBtn">☁ Buluta kaydet</button>
-        <span class="savestatus" id="saveStatus"></span>
+
+      <!-- Giriş ekranı: iki büyük sekme -->
+      <div id="adminHubScreen" class="admin-hub">
+        <button class="admin-hub-card" id="adminHubBranches" type="button">
+          <span class="admin-hub-icon">🏢</span>
+          <span class="admin-hub-title">Şubeleri Yönet</span>
+          <span class="admin-hub-desc">Şube sınıflandırması, giriş istatistikleri, ziyaret listeleri ve hedef firma ataması</span>
+        </button>
+        <button class="admin-hub-card" id="adminHubAudiences" type="button">
+          <span class="admin-hub-icon">🎯</span>
+          <span class="admin-hub-title">Hedef Kitleleri Yönet</span>
+          <span class="admin-hub-desc">DİİB, İlk 1000 ve Turquality listelerini yükle, firmaları birleştir</span>
+        </button>
       </div>
 
-      <div class="tim-block">
-        <div class="tim-title">🏆 İlk 1000 İhracatçı listesi <span class="hint-inline">(TİM)</span></div>
-        <div class="hint">TİM'in "İlk 1000 İhracatçı" listesini (Excel/CSV) yükle. Firmalar ada göre eşleştirilip rozetlenir. Sıra ve firma adı sütunları otomatik algılanır.</div>
-        <div class="drop small" id="dropTim"><b>İlk 1000 listesini seç</b> veya sürükle</div>
-        <input type="file" id="fileTim" accept=".xlsx,.xls,.csv">
-        <div class="tim-status" id="timStatus"></div>
-        <div class="saverow" id="timSaveRow" style="display:none">
-          <button class="btn primary" id="saveTimBtn">☁ İlk 1000'i buluta kaydet</button>
-          <button class="btn" id="clearTimBtn">Listeyi temizle</button>
+      <!-- SEKME 1: Şubeleri Yönet -->
+      <div id="adminBranchesScreen" class="admin-screen" hidden>
+        <button class="admin-back-btn" id="adminBackFromBranches" type="button">← Yönetim Ana Ekranına Dön</button>
+        <div class="admin-screen-title">🏢 Şubeleri Yönet</div>
+
+        <div class="branch-class-tabs" id="branchClassTabs">
+          <button class="branch-class-tab active" data-class="all" type="button">Tümü <span class="bct-count" id="bctAll">0</span></button>
+          <button class="branch-class-tab" data-class="ticari" type="button">Ticari Şube <span class="bct-count" id="bctTicari">0</span></button>
+          <button class="branch-class-tab" data-class="kurumsal" type="button">Kurumsal Şube <span class="bct-count" id="bctKurumsal">0</span></button>
+          <button class="branch-class-tab" data-class="kobi" type="button">Kobi Şube <span class="bct-count" id="bctKobi">0</span></button>
         </div>
-      </div>
-
-      <div class="tim-block">
-        <div class="tim-title">🎖️ Turquality / Marka Destek listesi <span class="hint-inline">(Ticaret Bak.)</span></div>
-        <div class="hint">Turquality desteklenen markalar listesini (Excel/CSV) yükle. Bu firmalar — DİİB'de olmasalar bile — havuza eklenir; marka, program ve iletişim bilgileri kartta görünür.</div>
-        <div class="drop small" id="dropTq"><b>Turquality listesini seç</b> veya sürükle</div>
-        <input type="file" id="fileTq" accept=".xlsx,.xls,.csv">
-        <div class="tim-status" id="tqStatus"></div>
-        <div class="saverow" id="tqSaveRow" style="display:none">
-          <button class="btn primary" id="saveTqBtn">☁ Turquality'yi buluta kaydet</button>
-          <button class="btn" id="clearTqBtn">Listeyi temizle</button>
-        </div>
-      </div>
-
-      <div class="tim-block">
-        <div class="tim-title">🏢 Şube Yönetimi</div>
-        <div class="hint">Şubelere göre giriş istatistiklerini gör, ya da bir şube seçip firma listesinden hedef ("yıldız") firmalar ata — o şubede giriş yapan kullanıcı, atadığın firmaları listenin en üstünde görür.</div>
 
         <div class="branch-mgmt-row">
           <select id="branchStatSelect"><option value="">— Şube seç —</option></select>
@@ -769,7 +810,64 @@ select:focus,input:focus{border-color:var(--exp)}
         <div id="branchStatsBox" class="branch-stats-box">
           <div class="branch-stats-empty">Yukarıdan bir şube seç, giriş geçmişini burada gör.</div>
         </div>
+
+        <div class="admin-subhead">Şube Listesi</div>
+        <div id="branchListTable" class="branch-list-table"></div>
       </div>
+
+      <!-- SEKME 2: Hedef Kitleleri Yönet -->
+      <div id="adminAudiencesScreen" class="admin-screen" hidden>
+        <button class="admin-back-btn" id="adminBackFromAudiences" type="button">← Yönetim Ana Ekranına Dön</button>
+        <div class="admin-screen-title">🎯 Hedef Kitleleri Yönet</div>
+
+        <div class="audience-grid">
+          <div class="audience-card">
+            <div class="audience-card-title">📄 DİİB <span class="hint-inline">(aylık, ticaret.gov.tr)</span></div>
+            <div class="hint">Belge Listeleri (D1, D3, H1) sayfasından her ayın <b>Dahilde İşleme İzin Belgeleri (D1)</b> Excel'ini indirip ekle. Ay otomatik algılanır.</div>
+            <div class="drop small" id="drop"><b>Dosya seç</b> veya sürükle (.xlsx / .xls / .csv)</div>
+            <input type="file" id="fileInput" multiple accept=".xlsx,.xls,.csv">
+            <div class="filelist" id="fileList"></div>
+            <div class="saverow" id="saveRow" style="display:none">
+              <button class="btn primary" id="saveCloudBtn">☁ Buluta kaydet</button>
+              <span class="savestatus" id="saveStatus"></span>
+            </div>
+          </div>
+
+          <div class="audience-card">
+            <div class="audience-card-title">🏆 İlk 1000 İhracatçı <span class="hint-inline">(TİM)</span></div>
+            <div class="hint">TİM'in "İlk 1000 İhracatçı" listesini yükle. Firmalar ada göre eşleştirilip rozetlenir.</div>
+            <div class="drop small" id="dropTim"><b>İlk 1000 listesini seç</b> veya sürükle</div>
+            <input type="file" id="fileTim" accept=".xlsx,.xls,.csv">
+            <div class="tim-status" id="timStatus"></div>
+            <div class="saverow" id="timSaveRow" style="display:none">
+              <button class="btn primary" id="saveTimBtn">☁ Buluta kaydet</button>
+              <button class="btn" id="clearTimBtn">Listeyi temizle</button>
+            </div>
+          </div>
+
+          <div class="audience-card">
+            <div class="audience-card-title">🎖️ Turquality / Marka Destek <span class="hint-inline">(Ticaret Bak.)</span></div>
+            <div class="hint">Turquality desteklenen markalar listesini yükle. DİİB'de olmasalar bile havuza eklenir.</div>
+            <div class="drop small" id="dropTq"><b>Turquality listesini seç</b> veya sürükle</div>
+            <input type="file" id="fileTq" accept=".xlsx,.xls,.csv">
+            <div class="tim-status" id="tqStatus"></div>
+            <div class="saverow" id="tqSaveRow" style="display:none">
+              <button class="btn primary" id="saveTqBtn">☁ Buluta kaydet</button>
+              <button class="btn" id="clearTqBtn">Listeyi temizle</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-subhead">Firma Listesi &amp; Manuel Birleştirme</div>
+        <div class="hint">Aşağıda tüm kaynaklardan (DİİB, İlk 1000, Turquality) gelen firmalar tek listede. İsim farklılığı yüzünden otomatik eşleşmeyen iki kaydı seçip elle birleştirebilirsin.</div>
+        <div class="merge-toolbar">
+          <input type="search" id="mergeSearchBox" placeholder="🔍 Firma ara…">
+          <span class="merge-selected-hint" id="mergeSelectedHint"></span>
+          <button class="btn primary" id="mergeConfirmBtn" disabled>🔗 Seçilenleri Birleştir</button>
+        </div>
+        <div id="mergeFirmList" class="merge-firm-list"></div>
+      </div>
+
     </div>
   </div>
 </details>
@@ -834,6 +932,7 @@ const S = {
   important: {},     // { subeKullaniciAdi: { firmaKey: true, ... }, ... } — şube kendi işaretler, buluttan yüklenir
   visits: {},        // { subeKullaniciAdi: { firmaKey: {status:"planned"|"done", ts:number} } } — şubenin ziyaret listesi
   loginLogs: {},     // { subeKullaniciAdi: [ts, ts, ...] } — buluttan yüklenir (yönetim panelinde)
+  manualMerges: {},  // { kucukKey: buyukKey } — admin'in elle "aynı firma" işaretlediği eşleşmeler, buluttan yüklenir
 };
 let fid = 0;
 
@@ -1388,6 +1487,28 @@ function applyStarPriority(list){
   return [...starred, ...important, ...rest];
 }
 
+// Admin'in "aynı firma" diye elle birleştirdiği kayıtları tek satıra indirger.
+// aggregate()'in kendisine dokunmaz — çıktısı üzerinde çalışan ayrı bir katmandır.
+function applyManualMerges(list){
+  const merges = S.manualMerges;
+  if (!merges || !Object.keys(merges).length) return list;
+  const byKey = {}; for (const a of list) byKey[a.key] = a;
+  const absorbed = new Set(); // küçük (kaybolan) key'ler
+  for (const [smallKey, bigKey] of Object.entries(merges)){
+    const small = byKey[smallKey], big = byKey[bigKey];
+    if (!small || !big || small===big) continue;
+    big.imp += small.imp; big.exp += small.exp; big.belge += small.belge;
+    if (!big.vkn && small.vkn) big.vkn = small.vkn;
+    if (!big.adres && small.adres) big.adres = small.adres;
+    if (!big.tim && small.tim) big.tim = small.tim;
+    if (!big.tq && small.tq) big.tq = small.tq;
+    big.src = { ...small.src, ...big.src };
+    absorbed.add(smallKey);
+  }
+  if (!absorbed.size) return list;
+  return list.filter(a=>!absorbed.has(a.key));
+}
+
 /* ================= RENDER ================= */
 function renderIlOptions(){
   const cur=$("ilSel").value;
@@ -1509,7 +1630,7 @@ function render(){
   $("emptyState").style.display = has?"none":"";
   if (!has) return;
   renderIlOptions();
-  const list = applyStarPriority(filtered());
+  const list = applyManualMerges(applyStarPriority(filtered()));
   renderActiveFilterTags();
   const tImp = list.reduce((s,a)=>s+a.imp,0), tExp = list.reduce((s,a)=>s+a.exp,0);
   $("stats").innerHTML = `
@@ -1678,7 +1799,7 @@ document.addEventListener("click", e=>{
   if (!key) return;
   S._openFirm = key;
   // Tıklanan firma, gösterilen ilk S.shown kayıt dışında kalmasın diye gerektiği kadar genişlet
-  const list = applyStarPriority(filtered());
+  const list = applyManualMerges(applyStarPriority(filtered()));
   const idx = list.findIndex(a=>a.key===key);
   if (idx >= 0 && idx >= S.shown) S.shown = idx + 10;
   render();
@@ -2271,7 +2392,152 @@ function renderAuth(){
 
 // ---- Yönetim paneli: Şube Yönetimi (giriş istatistikleri + yıldız firma atama) ----
 
-// Şube seçici açılır listesini SUBE_TABLE'dan bir kez doldur
+// ---- Yönetim ana ekranı: sekme navigasyonu ----
+function showAdminHub(){
+  $("adminHubScreen").hidden = false;
+  $("adminBranchesScreen").hidden = true;
+  $("adminAudiencesScreen").hidden = true;
+}
+function showAdminBranches(){
+  $("adminHubScreen").hidden = true;
+  $("adminBranchesScreen").hidden = false;
+  $("adminAudiencesScreen").hidden = true;
+  fillBranchStatSelect();
+  renderBranchClassCounts();
+  renderBranchListTable();
+}
+function showAdminAudiences(){
+  $("adminHubScreen").hidden = true;
+  $("adminBranchesScreen").hidden = true;
+  $("adminAudiencesScreen").hidden = false;
+  renderMergeFirmList();
+}
+$("adminHubBranches") && ($("adminHubBranches").onclick = showAdminBranches);
+$("adminHubAudiences") && ($("adminHubAudiences").onclick = showAdminAudiences);
+$("adminBackFromBranches") && ($("adminBackFromBranches").onclick = showAdminHub);
+$("adminBackFromAudiences") && ($("adminBackFromAudiences").onclick = showAdminHub);
+
+// ---- Manuel Birleştirme: tüm firmaları listele, iki tanesini seçip birleştir ----
+S._mergeSelected = []; // en fazla 2 key tutar
+
+function renderMergeFirmList(){
+  const box = $("mergeFirmList");
+  if (!box) return;
+  const q = trUp(($("mergeSearchBox")?.value || "").trim());
+  let list = aggregate(); // ham liste — birleştirilecek çiftleri BULMAK için manuel birleştirme uygulanmamış hâli lazım
+  if (q) list = list.filter(a=>trUp(a.firma).includes(q));
+  list = list.slice().sort((a,b)=>a.firma.localeCompare(b.firma,"tr")).slice(0, 200); // performans için üst sınır
+  if (!list.length){ box.innerHTML = `<div class="branch-stats-empty">Eşleşen firma yok.</div>`; return; }
+  box.innerHTML = list.map(a=>{
+    const srcTags = [a.src?.diib?"DİİB":"", a.src?.tim?"İlk1000":"", a.src?.tq?"TQ":""].filter(Boolean).join("+");
+    const selected = S._mergeSelected.includes(a.key);
+    return `<label class="merge-firm-row${selected?" selected":""}">
+      <input type="checkbox" data-merge-key="${a.key}" ${selected?"checked":""}>
+      <span class="merge-firm-name">${a.firma}</span>
+      <span class="merge-firm-src">${srcTags}</span>
+    </label>`;
+  }).join("");
+  updateMergeToolbar();
+}
+
+$("mergeSearchBox") && $("mergeSearchBox").addEventListener("input", ()=>renderMergeFirmList());
+
+$("mergeFirmList") && $("mergeFirmList").addEventListener("change", e=>{
+  const cb = e.target.closest("input[data-merge-key]");
+  if (!cb) return;
+  const key = cb.dataset.mergeKey;
+  if (cb.checked){
+    if (S._mergeSelected.length >= 2){
+      // zaten 2 seçiliyken üçüncüsüne basılırsa, en eskisini bırak
+      S._mergeSelected.shift();
+    }
+    S._mergeSelected.push(key);
+  } else {
+    S._mergeSelected = S._mergeSelected.filter(k=>k!==key);
+  }
+  renderMergeFirmList();
+});
+
+function updateMergeToolbar(){
+  const hint = $("mergeSelectedHint"), btn = $("mergeConfirmBtn");
+  if (!hint || !btn) return;
+  const n = S._mergeSelected.length;
+  hint.textContent = n===0 ? "İki firma seç" : n===1 ? "1 firma seçildi — bir tane daha seç" : "2 firma seçildi";
+  btn.disabled = n !== 2;
+}
+
+$("mergeConfirmBtn") && $("mergeConfirmBtn").addEventListener("click", async ()=>{
+  if (S._mergeSelected.length !== 2) return;
+  const all = aggregate();
+  const byKey = {}; for (const a of all) byKey[a.key] = a;
+  const [k1, k2] = S._mergeSelected;
+  const a1 = byKey[k1], a2 = byKey[k2];
+  if (!a1 || !a2) return;
+  // Daha az veri kaynağına sahip olan (ya da belge sayısı düşük olan) "küçük" sayılır, diğerine katılır
+  const score = a => (a.src?.diib?1:0) + (a.src?.tim?1:0) + (a.src?.tq?1:0) + (a.belge||0)*0.01;
+  const [small, big] = score(a1) <= score(a2) ? [a1,a2] : [a2,a1];
+  const current = { ...S.manualMerges, [small.key]: big.key };
+  S.manualMerges = current;
+  S._mergeSelected = [];
+  render();
+  renderMergeFirmList();
+  try{
+    await fbDB.ref("manualMerges").set(current);
+    toast(`"${small.firma}" → "${big.firma}" ile birleştirildi`);
+  }catch(e){
+    toast("Birleştirme kaydedilemedi: "+(e.message||e.code));
+  }
+});
+
+// ---- Şube sınıflandırması: isimde "Ticari"/"Kurumsal" geçiyorsa öyle, yoksa "Kobi" ----
+function branchClassOf(subeAdi){
+  if (/ticari/i.test(subeAdi)) return "ticari";
+  if (/kurumsal/i.test(subeAdi)) return "kurumsal";
+  return "kobi";
+}
+const BRANCH_CLASS_LABEL = {ticari:"Ticari Şube", kurumsal:"Kurumsal Şube", kobi:"Kobi Şube"};
+
+function renderBranchClassCounts(){
+  const counts = {ticari:0, kurumsal:0, kobi:0};
+  for (const uname in SUBE_TABLE){ counts[branchClassOf(SUBE_TABLE[uname][0])]++; }
+  const total = counts.ticari + counts.kurumsal + counts.kobi;
+  if ($("bctAll")) $("bctAll").textContent = total;
+  if ($("bctTicari")) $("bctTicari").textContent = counts.ticari;
+  if ($("bctKurumsal")) $("bctKurumsal").textContent = counts.kurumsal;
+  if ($("bctKobi")) $("bctKobi").textContent = counts.kobi;
+}
+
+S._branchClassFilter = "all";
+document.querySelectorAll(".branch-class-tab").forEach(tab=>{
+  tab.addEventListener("click", ()=>{
+    S._branchClassFilter = tab.dataset.class;
+    document.querySelectorAll(".branch-class-tab").forEach(t=>t.classList.toggle("active", t===tab));
+    renderBranchListTable();
+  });
+});
+
+// Şube listesini (sınıf, giriş sayısı, ziyaret listesi özeti) tablo halinde çiz
+function renderBranchListTable(){
+  const box = $("branchListTable");
+  if (!box) return;
+  let entries = Object.entries(SUBE_TABLE).map(([uname, rec])=>({
+    uname, name: rec[0], cls: branchClassOf(rec[0])
+  }));
+  if (S._branchClassFilter !== "all") entries = entries.filter(e=>e.cls===S._branchClassFilter);
+  entries.sort((a,b)=>a.name.localeCompare(b.name,"tr"));
+  if (!entries.length){ box.innerHTML = `<div class="branch-stats-empty">Bu sınıfta şube yok.</div>`; return; }
+  box.innerHTML = entries.map(e=>{
+    const loginCount = S.loginLogs[e.uname] ? Object.keys(S.loginLogs[e.uname]).length : 0;
+    const visitEntries = S.visits[e.uname] ? Object.values(S.visits[e.uname]) : [];
+    return `<div class="branch-list-row">
+      <span class="branch-list-tag ${e.cls}">${BRANCH_CLASS_LABEL[e.cls]}</span>
+      <span class="branch-list-name">${e.name}</span>
+      <span class="branch-list-stat">${loginCount} giriş</span>
+      <span class="branch-list-stat">🔖 ${visitEntries.length} ziyaret</span>
+    </div>`;
+  }).join("");
+}
+
 function fillBranchStatSelect(){
   const sel = $("branchStatSelect");
   if (!sel || sel.dataset.filled) return;
@@ -2343,6 +2609,7 @@ function renderAdminStats(){
   const box = $("branchStatsBox");
   if (!box) return;
   fillBranchStatSelect();
+  if ($("adminBranchesScreen") && !$("adminBranchesScreen").hidden) renderBranchListTable();
   const uname = $("branchStatSelect") ? $("branchStatSelect").value : "";
   if (!uname){
     box.innerHTML = `<div class="branch-stats-empty">Yukarıdan bir şube seç, giriş geçmişini burada gör.</div>`;
@@ -2426,6 +2693,12 @@ function loadCloud(){
   fbDB.ref("loginLogs").on("value", snap=>{
     S.loginLogs = snap.val() || {};
     renderAdminStats();
+  }, ()=>{});
+  // Admin'in elle birleştirdiği firma eşleşmelerini buluttan yükle (herkese açık okuma; sadece admin yazar)
+  fbDB.ref("manualMerges").on("value", snap=>{
+    S.manualMerges = snap.val() || {};
+    render();
+    if ($("adminAudiencesScreen") && !$("adminAudiencesScreen").hidden) renderMergeFirmList();
   }, ()=>{});
 }
 
