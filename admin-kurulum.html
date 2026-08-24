@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Hesapları Kurulum Aracı — TEK SEFERLİK</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+body{background:#0D1220;color:#E9EDF6;font-family:-apple-system,'IBM Plex Sans',sans-serif;max-width:700px;margin:30px auto;padding:0 16px;line-height:1.6}
+h1{font-size:22px} h2{font-size:16px;margin-top:28px;color:#8B96AF}
+.warn{background:rgba(224,96,96,.1);border:1px solid #E06060;border-radius:10px;padding:14px 16px;margin:16px 0}
+.card{background:#151C2E;border:1px solid #26304A;border-radius:12px;padding:16px;margin:14px 0}
+button{background:#35C4A8;color:#06251F;border:none;border-radius:9px;padding:11px 18px;font-size:14.5px;font-weight:600;cursor:pointer;margin-right:8px}
+button:disabled{opacity:.5;cursor:default}
+#log{background:#0B1020;border:1px solid #26304A;border-radius:10px;padding:12px;min-height:80px;overflow-y:auto;font-family:'IBM Plex Mono',monospace;font-size:12.5px;white-space:pre-wrap;margin-top:12px}
+.ok{color:#35C4A8} .err{color:#E06060} .info{color:#8B96AF}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+td,th{text-align:left;padding:6px 8px;border-bottom:1px solid #26304A;font-size:13px}
+</style>
+</head>
+<body>
+<h1>🛠️ Admin Hesapları Kurulum Aracı</h1>
+<div class="warn"><b>Bu araç TEK SEFERLİK kullanım içindir.</b> 2 yönetim hesabını Firebase Authentication'a ekler.
+Çalıştırdıktan sonra bu dosyayı silebilir ya da kenara koyabilirsin.</div>
+
+<div class="card">
+  <b>Oluşturulacak hesaplar</b>
+  <table>
+    <tr><th>İsim</th><th>Kullanıcı adı</th><th>Şifre</th></tr>
+    <tr><td>Ensar</td><td>ensar</td><td>65P56S</td></tr>
+    <tr><td>DTP Admin</td><td>dtpadmin</td><td>9G3B43</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <b>Hesapları oluştur</b>
+  <p class="info">Firebase Authentication'a <code>Email/Password</code> sağlayıcısının açık olduğundan emin ol (Console → Authentication → Sign-in method). Zaten şube hesapları için açmıştın, ek bir işlem gerekmez.</p>
+  <button id="startBtn">Hesapları oluşturmaya başla</button>
+  <div id="log"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBhiZzFGFVQsrwJHTsY_ch5-dSNmEvIWg8",
+  authDomain: "diib-d006d.firebaseapp.com",
+  databaseURL: "https://diib-d006d-default-rtdb.firebaseio.com",
+  projectId: "diib-d006d",
+  storageBucket: "diib-d006d.firebasestorage.app",
+  messagingSenderId: "1086990363192",
+  appId: "1:1086990363192:web:b673d13cb9317f6a83d4cd"
+};
+const ADMIN_EMAIL_DOMAIN = "admin.disticaretradar.local";
+
+const ADMINS = [
+  {isim:"Ensar", kullanici_adi:"ensar", sifre:"65P56S"},
+  {isim:"DTP Admin", kullanici_adi:"dtpadmin", sifre:"9G3B43"},
+];
+
+firebase.initializeApp(firebaseConfig);
+// Hesapları "secondary app" ile oluşturuyoruz ki senin mevcut oturumun (varsa) etkilenmesin
+const secondaryApp = firebase.initializeApp(firebaseConfig, "secondary");
+const secondaryAuth = secondaryApp.auth();
+
+const $ = id => document.getElementById(id);
+const log = (msg, cls) => { const d=$("log"); const line=document.createElement("div"); if(cls) line.className=cls; line.textContent=msg; d.appendChild(line); d.scrollTop = d.scrollHeight; };
+
+$("startBtn").onclick = async ()=>{
+  $("startBtn").disabled = true;
+  log("Başlıyor...", "info");
+  for (const a of ADMINS){
+    const email = a.kullanici_adi + "@" + ADMIN_EMAIL_DOMAIN;
+    try{
+      await secondaryAuth.createUserWithEmailAndPassword(email, a.sifre);
+      log(`✓ ${a.isim} (${a.kullanici_adi}) oluşturuldu`, "ok");
+    }catch(e){
+      if (e.code === "auth/email-already-in-use"){
+        log(`— ${a.isim} zaten var, atlanıyor`, "info");
+      } else {
+        log(`✗ HATA ${a.isim}: ${e.code}`, "err");
+      }
+    }
+    await secondaryAuth.signOut().catch(()=>{});
+    await new Promise(r=>setTimeout(r, 1500));
+  }
+  log("TAMAMLANDI.", "ok");
+};
+</script>
+</body>
+</html>
