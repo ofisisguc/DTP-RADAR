@@ -26,8 +26,8 @@ lets branch employees filter/sort companies by location, import/export volume, a
   for context. The old local history is kept on the `eski-gecmis-yerel` branch — never push it anywhere (its
   commits carry the user's personal email).
 - Remote: `origin` = `git@github-ofisisguc:ofisisguc/DTP-RADAR.git` (SSH host alias in `~/.ssh/config` using
-  `~/.ssh/id_ed25519_ofisisguc`). The user does not want the old `ensar0-beep` GitHub account involved at all —
-  never push to, add, or reference it. Repo-local git identity is `ofisisguc` with the GitHub noreply email.
+  `~/.ssh/id_ed25519_ofisisguc`). The user does not want their old personal GitHub account (the machine's
+  default `~/.ssh/id_ed25519` identity) involved at all — never push with it, add it, or name it in project files. Repo-local git identity is `ofisisguc` with the GitHub noreply email.
 - Live site branches use: https://dtpradar.netlify.app (Netlify auto-deploys from the GitHub repo on push).
 
 ## Running / testing
