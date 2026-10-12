@@ -22,7 +22,13 @@ lets branch employees filter/sort companies by location, import/export volume, a
   After editing `index_NN.html`, always `cp` it over `index.html` before committing.
 - `bulutindex.html` is a second synced copy of the same file, kept for the company's own cloud hosting
   (the user uploads it there by hand). Keep it identical to `index.html` on every save.
-- Git history is currently a single squashed commit; don't rely on file history for context.
+- Git history was restarted as a fresh snapshot in the `ofisisguc/DTP-RADAR` repo; don't rely on file history
+  for context. The old local history is kept on the `eski-gecmis-yerel` branch — never push it anywhere (its
+  commits carry the user's personal email).
+- Remote: `origin` = `git@github-ofisisguc:ofisisguc/DTP-RADAR.git` (SSH host alias in `~/.ssh/config` using
+  `~/.ssh/id_ed25519_ofisisguc`). The user does not want the old `ensar0-beep` GitHub account involved at all —
+  never push to, add, or reference it. Repo-local git identity is `ofisisguc` with the GitHub noreply email.
+- Live site branches use: https://dtpradar.netlify.app (Netlify auto-deploys from the GitHub repo on push).
 
 ## Running / testing
 
