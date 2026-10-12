@@ -23,7 +23,8 @@ const db = admin.database();
     const dosya = process.argv[process.argv.indexOf("--geri-yukle") + 1];
     if (!dosya || !fs.existsSync(dosya)) { console.error("Yedek dosyası bulunamadı:", dosya); process.exit(1); }
     const veri = JSON.parse(fs.readFileSync(dosya, "utf8"));
-    await db.ref("addrGeo").set(veri);
+    // meta/addrGeo damgası da değişsin ki telefonlardaki önbellek geri yüklenen konumları indirsin
+    await db.ref().update({ addrGeo: veri, "meta/addrGeo": Date.now() });
     console.log(`Geri yüklendi: ${Object.keys(veri).length} kayıt ← ${dosya}`);
     process.exit(0);
   }

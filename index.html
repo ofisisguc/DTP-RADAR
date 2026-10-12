@@ -2548,7 +2548,7 @@ async function deleteMonthFromCloud(f){
   if (!S.isAdmin){ toast("Silmek için admin girişi gerekir."); return; }
   if (!confirm(`"${monthLabel(f.month)}" ayı buluttan kalıcı olarak silinecek ve herkesten kalkacak. Emin misin?`)) return;
   try{
-    await fbDB.ref("months/"+f.month).remove();
+    await fbDB.ref().update({ ["months/"+f.month]: null, ["meta/months/"+f.month]: null });
     toast(`${monthLabel(f.month)} buluttan silindi.`);
     // loadCloud dinleyicisi listeyi otomatik yeniler
   }catch(e){
@@ -6039,11 +6039,194 @@ function cloudOn(path, cb, errCb){ const r = fbDB.ref(path); r.on("value", cb, e
 function detachCloud(){
   CLOUD_REFS.forEach(r=>{ try{ r.off(); }catch(e){} }); CLOUD_REFS.length = 0;
   S._cloudOn = false;
+  S._cloudOturum = (S._cloudOturum||0) + 1; // yolda olan önbellek/bulut okumaları eski oturuma yazmasın
+  S._canliVeri = false;
+  S._hamAylar = S._hamTim = S._hamTq = S._hamMeta = undefined;
   S.files = S.files.filter(f=>f.dirty);
   S.starred = {}; S.important = {}; S.visits = {}; S.loginLogs = {};
 }
+/* ================= ORTAK VERİ İŞLEYİCİLERİ =================
+   Aylar / TİM / Turquality / konumlar nereden gelirse gelsin (canlı dinleyici, telefondaki önbellek ya da
+   buluttan tek seferlik okuma) aynı fonksiyonlardan geçer. */
+function aylarGeldi(data){
+  S._cloudFirstData = true;
+  // Buluttaki her ayı S.files içine (cloud) olarak koy; elle yüklenmiş dirty dosyaları koru.
+  const dirtyKept = S.files.filter(f=>f.dirty);
+  const cloudFiles = Object.entries(data).map(([month, node])=>({
+    id:++fid,
+    name:`${monthLabel(month)} (bulut)`,
+    month,
+    records: unpackRecords(node.r),
+    cloud:true, dirty:false
+  })).sort((a,b)=>b.month.localeCompare(a.month));
+  S.files = [...cloudFiles, ...dirtyKept];
+  setEmptyState(S.files.length ? "" : "Henüz bulutta veri yok. Admin girişi yapıp ilk ayı yükle.", false);
+  renderFiles(); refreshPeriodOptions(); render(); updateSaveRow();
+  renderAdminOverview(); // Genel Bakış (Toplam Firma sayısı + harita) veri gelince tazelensin
+  renderDataStatus();
+  if ($("adminFirmsScreen") && !$("adminFirmsScreen").hidden){ renderMergeFirmList(); renderDuplicateSuggestions(); }
+  maybeAutoLocation();
+  // Şube girişinde konum veri gelmeden önce ayarlanmış olabilir; veri gelince mesafeleri tazele
+  if (S.userLoc) geocodeVisible();
+}
+function timGeldi(v){
+  if (v && v.map && !S.timDirty){ S.tim = v.map; S.timYear = v.year||""; S.timUpdated = v.updated||0; renderDataStatus(); if ($("adminFirmsScreen") && !$("adminFirmsScreen").hidden){ renderMergeFirmList(); renderDuplicateSuggestions(); } refreshTimChip(); render(); renderAdminOverview(); if (S.userLoc) geocodeVisible(); }
+}
+function tqGeldi(v){
+  if (v && v.map && !S.tqDirty){ S.tq = v.map; S.tqUpdated = v.updated||0; renderDataStatus(); if ($("adminFirmsScreen") && !$("adminFirmsScreen").hidden){ renderMergeFirmList(); renderDuplicateSuggestions(); } refreshTqChip(); render(); renderAdminOverview(); if (S.userLoc) geocodeVisible(); }
+}
+// Önceden hesaplanmış TAM ADRES koordinatları (scripts/geocode.js yazar)
+function addrGeoGeldi(v){
+  S.addrGeo = v || {};
+  S._addrGeoYuklendi = true;
+  if (S.userLoc) geocodeVisible(); // yeni/güncel adres koordinatı geldiyse mesafeleri baştan hesapla
+  // Konum Denetimi ekranı açıkken veri sonradan gelirse tazelensin — yoksa koordinatlar
+  // henüz yüklenmemişken "hepsi koordinatsız" gibi yanıltıcı bir tablo kalıyordu
+  if ($("adminGeoScreen") && !$("adminGeoScreen").hidden){ S._geoDenetim = null; renderKonumDenetim(); }
+}
+
+// Eski (önbelleksiz) yol: dört düğümü canlı dinler. Admin hep bunu kullanır; şube tarafında önbellek
+// herhangi bir nedenle çalışmazsa (damga yok, okuma hatası) buna düşülür — en kötü ihtimalle eskisi gibi çalışır.
+function canliVeriDinle(){
+  if (S._canliVeri) return;
+  S._canliVeri = true;
+  cloudOn("months", snap=>{ S._hamAylar = snap.val() || {}; aylarGeldi(S._hamAylar); metaKontrol(); },
+    err=>{ setEmptyState("Bulut okunamadı: "+err.message, false); });
+  cloudOn("tim", snap=>{ S._hamTim = snap.val(); timGeldi(S._hamTim); metaKontrol(); });
+  cloudOn("tq", snap=>{ S._hamTq = snap.val(); tqGeldi(S._hamTq); metaKontrol(); });
+  cloudOn("addrGeo", snap=>addrGeoGeldi(snap.val()));
+}
+
+/* ================= ÖNBELLEK (telefonda veri saklama) =================
+   Aylar, TİM, Turquality ve konumlar herkese ortak, büyük (~3 MB) ve ayda bir değişiyor. Şube tarafında
+   bunlar telefonun IndexedDB'sinde saklanır; her açılışta yalnızca küçük "meta" düğümü dinlenir:
+     meta = { months: { "2026-07": <updated>, … }, tim: <updated>, tq: <updated>, addrGeo: <damga> }
+   Damgası telefondakiyle aynı olan parça telefondan, farklı olan buluttan gelir. Damgaları admin yazarken
+   (aynı çok-yollu update içinde), scripts/geocode.js de konum yazınca günceller; metaKontrol() ise admin
+   açıkken eksik/yanlış damgayı onarır. */
+const ONB_DB = "dtpRadarOnbellek";
+let _onbDbSoz = null;
+function onbAc(){
+  if (!_onbDbSoz) _onbDbSoz = new Promise((res, rej)=>{
+    try{
+      const r = indexedDB.open(ONB_DB, 1);
+      r.onupgradeneeded = ()=> r.result.createObjectStore("kv");
+      r.onsuccess = ()=> res(r.result);
+      r.onerror = ()=> rej(r.error);
+      r.onblocked = ()=> rej(new Error("blocked"));
+    }catch(e){ rej(e); }
+  });
+  return _onbDbSoz;
+}
+// Okuma/yazma asla hata fırlatmaz: önbellek kullanılamıyorsa (gizli sekme, dolu depo…) veri buluttan okunur
+async function onbOku(k){
+  try{
+    const db = await onbAc();
+    return await new Promise(res=>{ const q = db.transaction("kv").objectStore("kv").get(k); q.onsuccess = ()=>res(q.result); q.onerror = ()=>res(undefined); });
+  }catch(e){ return undefined; }
+}
+async function onbYaz(k, v){ // v === undefined → sil
+  try{
+    const db = await onbAc();
+    await new Promise(res=>{
+      const tx = db.transaction("kv", "readwrite");
+      if (v === undefined) tx.objectStore("kv").delete(k); else tx.objectStore("kv").put(v, k);
+      tx.oncomplete = tx.onerror = tx.onabort = ()=>res();
+    });
+  }catch(e){}
+}
+// Bir parçayı ("months/2026-07", "tim"…) damgası tutuyorsa telefondan, tutmuyorsa buluttan getirir.
+// Damga yoksa (henüz yazılmamış) her seferinde buluttan okunur ve saklanmaz.
+async function onbParca(yol, damga){
+  if (damga != null){
+    const c = await onbOku(yol);
+    if (c && c.u === damga) return c.v;
+  }
+  const v = (await fbDB.ref(yol).once("value")).val();
+  if (damga != null) onbYaz(yol, v == null ? undefined : { u: damga, v });
+  return v;
+}
+const aylarImzasi = aylar => JSON.stringify(Object.keys(aylar).sort().map(k=>[k, aylar[k]]));
+
+function onbellekliYukle(){
+  const oturum = S._cloudOturum;
+  const gecerli = ()=> oturum === S._cloudOturum && !S._canliVeri;
+  let son = null;              // en son ekrana basılan parçaların damgaları
+  const islenen = new Set();   // buluttan doğrulanmış veriyle işlenen parçalar — telefondaki kopya bunları ezmesin
+  let sira = Promise.resolve();
+
+  // 1) Bağlantı kurulmasını beklemeden telefondaki son kopyayla aç; meta gelince doğrulanır
+  (async ()=>{
+    const liste = await onbOku("aylar");
+    if (!Array.isArray(liste) || !liste.length) return;
+    const aylar = {}, damgalar = {};
+    for (const ay of liste){ const c = await onbOku("months/"+ay); if (c && c.v){ aylar[ay] = c.v; damgalar[ay] = c.u; } }
+    const [tim, tq, geo] = await Promise.all(["tim", "tq", "addrGeo"].map(onbOku));
+    if (!gecerli() || !Object.keys(aylar).length) return;
+    const ilk = { aylar: aylarImzasi(damgalar) };
+    if (!islenen.has("aylar")) aylarGeldi(aylar);
+    for (const [k, c, fn] of [["tim", tim, timGeldi], ["tq", tq, tqGeldi], ["addrGeo", geo, addrGeoGeldi]]){
+      if (c && !islenen.has(k)){ fn(c.v); ilk[k] = c.u; }
+    }
+    if (son === null) son = ilk;
+  })();
+
+  // 2) Damgaları canlı dinle; değişen parçayı indir
+  cloudOn("meta", snap=>{
+    const meta = snap.val();
+    if (!meta || !meta.months){ canliVeriDinle(); return; } // damgalar hiç yazılmamış → eski yol
+    sira = sira.then(()=>metaIsle(meta)).catch(e=>{
+      console.warn("Önbellek kullanılamadı, doğrudan buluttan okunuyor:", e);
+      if (oturum === S._cloudOturum) canliVeriDinle();
+    });
+  }, ()=>{ if (oturum === S._cloudOturum) canliVeriDinle(); });
+
+  async function metaIsle(meta){
+    if (!gecerli()) return;
+    const aylar = meta.months || {};
+    const imza = aylarImzasi(aylar);
+    if (!son || son.aylar !== imza){
+      const sonuc = {};
+      await Promise.all(Object.entries(aylar).map(async ([ay, u])=>{ const v = await onbParca("months/"+ay, u); if (v && v.r) sonuc[ay] = v; }));
+      if (!gecerli()) return;
+      // Buluttan silinen aylar telefondan da silinsin
+      const eski = (await onbOku("aylar")) || [];
+      eski.filter(ay=>!(ay in aylar)).forEach(ay=>onbYaz("months/"+ay, undefined));
+      onbYaz("aylar", Object.keys(aylar).sort());
+      if (!gecerli()) return;
+      islenen.add("aylar");
+      aylarGeldi(sonuc);
+    } else islenen.add("aylar");
+    const yeni = { aylar: imza };
+    for (const [k, fn] of [["tim", timGeldi], ["tq", tqGeldi], ["addrGeo", addrGeoGeldi]]){
+      const d = meta[k] == null ? null : meta[k];
+      yeni[k] = d;
+      if (son && d !== null && son[k] === d){ islenen.add(k); continue; }
+      const v = await onbParca(k, d);
+      if (!gecerli()) return;
+      islenen.add(k);
+      fn(v);
+    }
+    son = yeni;
+  }
+}
+
+// Admin açıkken damgaları gerçek veriyle karşılaştırıp onarır: eski bir sürümle (ör. elle yüklenen bulut
+// kopyası) ay yüklenmişse ya da damga hiç yazılmamışsa şubelerin önbelleği yeni veriyi kaçırmasın.
+function metaKontrol(){
+  if (!S.isAdmin || S._hamMeta === undefined || S._hamAylar === undefined || S._hamTim === undefined || S._hamTq === undefined) return;
+  const meta = S._hamMeta || {}, mm = meta.months || {}, yama = {};
+  for (const [ay, node] of Object.entries(S._hamAylar)){ const u = (node && node.updated) || 1; if (mm[ay] !== u) yama["meta/months/"+ay] = u; }
+  for (const ay of Object.keys(mm)) if (!(ay in S._hamAylar)) yama["meta/months/"+ay] = null;
+  const tu = S._hamTim ? (S._hamTim.updated || 1) : null; if ((meta.tim ?? null) !== tu) yama["meta/tim"] = tu;
+  const qu = S._hamTq ? (S._hamTq.updated || 1) : null; if ((meta.tq ?? null) !== qu) yama["meta/tq"] = qu;
+  if (meta.addrGeo == null) yama["meta/addrGeo"] = Date.now();
+  if (Object.keys(yama).length) fbDB.ref().update(yama).catch(e=>console.warn("Damga onarılamadı:", e));
+}
+
 function loadCloud(){
   S._cloudOn = true;
+  S._cloudOturum = (S._cloudOturum||0) + 1;
   // Şirket ağları Firebase'in canlı bağlantısını (firebaseio.com / WebSocket) engelleyebiliyor; kullanıcı
   // sonsuza kadar "yükleniyor" görmesin diye 20 sn içinde veri gelmezse açıklayıcı bir uyarı gösterilir.
   // Bağlantı sonradan kurulursa dinleyici çalışır ve liste kendiliğinden gelir.
@@ -6056,40 +6239,10 @@ function loadCloud(){
   cloudOn(".info/connected", snap=>{
     if (snap.val()===false && S._cloudOn && !S._cloudFirstData && !S.files.length) setEmptyState("Bulut sunucusuna bağlanılıyor…", true);
   });
-  cloudOn("months", snap=>{
-    S._cloudFirstData = true;
-    const data = snap.val() || {};
-    // Buluttaki her ayı S.files içine (cloud) olarak koy; elle yüklenmiş dirty dosyaları koru.
-    const dirtyKept = S.files.filter(f=>f.dirty);
-    const cloudFiles = Object.entries(data).map(([month, node])=>({
-      id:++fid,
-      name:`${monthLabel(month)} (bulut)`,
-      month,
-      records: unpackRecords(node.r),
-      cloud:true, dirty:false
-    })).sort((a,b)=>b.month.localeCompare(a.month));
-    S.files = [...cloudFiles, ...dirtyKept];
-    setEmptyState(S.files.length ? "" : "Henüz bulutta veri yok. Admin girişi yapıp ilk ayı yükle.", false);
-    renderFiles(); refreshPeriodOptions(); render(); updateSaveRow();
-    renderAdminOverview(); // Genel Bakış (Toplam Firma sayısı + harita) veri gelince tazelensin
-    renderDataStatus();
-    if ($("adminFirmsScreen") && !$("adminFirmsScreen").hidden){ renderMergeFirmList(); renderDuplicateSuggestions(); }
-    maybeAutoLocation();
-    // Şube girişinde konum veri gelmeden önce ayarlanmış olabilir; veri gelince mesafeleri tazele
-    if (S.userLoc) geocodeVisible();
-  }, err=>{
-    setEmptyState("Bulut okunamadı: "+err.message, false);
-  });
-  // İlk 1000 listesini buluttan yükle
-  cloudOn("tim", snap=>{
-    const v = snap.val();
-    if (v && v.map && !S.timDirty){ S.tim = v.map; S.timYear = v.year||""; S.timUpdated = v.updated||0; renderDataStatus(); if ($("adminFirmsScreen") && !$("adminFirmsScreen").hidden){ renderMergeFirmList(); renderDuplicateSuggestions(); } refreshTimChip(); render(); renderAdminOverview(); if (S.userLoc) geocodeVisible(); }
-  });
-  // Turquality listesini buluttan yükle
-  cloudOn("tq", snap=>{
-    const v = snap.val();
-    if (v && v.map && !S.tqDirty){ S.tq = v.map; S.tqUpdated = v.updated||0; renderDataStatus(); if ($("adminFirmsScreen") && !$("adminFirmsScreen").hidden){ renderMergeFirmList(); renderDuplicateSuggestions(); } refreshTqChip(); render(); renderAdminOverview(); if (S.userLoc) geocodeVisible(); }
-  });
+  // Ortak büyük veri (aylar, TİM, Turquality, konumlar): admin canlı dinler ve damgaları onarır;
+  // şube / departman / misafir telefondaki önbellekten açar, yalnızca değişen parçayı indirir (bkz. ÖNBELLEK).
+  if (S.isAdmin){ canliVeriDinle(); cloudOn("meta", snap=>{ S._hamMeta = snap.val(); metaKontrol(); }); }
+  else onbellekliYukle();
   // Yönetimin yayınladığı duyuru (kampanya pop-up'ı) — herkes okur, sadece admin yazar
   cloudOn("announcement", snap=>{
     S.announcement = snap.val() || null;
@@ -6115,15 +6268,6 @@ function loadCloud(){
     cloudOn("important/"+uname, snap=>{ S.important = {[uname]: snap.val() || {}}; render(); });
     cloudOn("visits/"+uname, snap=>{ S.visits = {[uname]: snap.val() || {}}; render(); if (!$("visitListScreen").hidden) renderVisitListScreen(); });
   }
-  // Önceden hesaplanmış TAM ADRES koordinatlarını buluttan yükle (scripts/geocode.js yazar)
-  cloudOn("addrGeo", snap=>{
-    S.addrGeo = snap.val() || {};
-    S._addrGeoYuklendi = true;
-    if (S.userLoc) geocodeVisible(); // yeni/güncel adres koordinatı geldiyse mesafeleri baştan hesapla
-    // Konum Denetimi ekranı açıkken veri sonradan gelirse tazelensin — yoksa koordinatlar
-    // henüz yüklenmemişken "hepsi koordinatsız" gibi yanıltıcı bir tablo kalıyordu
-    if ($("adminGeoScreen") && !$("adminGeoScreen").hidden){ S._geoDenetim = null; renderKonumDenetim(); }
-  });
   // Admin'in elle birleştirdiği firma eşleşmelerini buluttan yükle (sadece admin yazar)
   cloudOn("manualMerges", snap=>{
     S.manualMerges = snap.val() || {};
@@ -6144,7 +6288,9 @@ $("saveCloudBtn").onclick = async ()=>{
     const byMonth={};
     for (const f of dirty){ (byMonth[f.month] ||= []).push(...f.records); }
     for (const [month, recs] of Object.entries(byMonth)){
-      await fbDB.ref("months/"+month).set({ r:packRecords(recs), updated:Date.now(), count:recs.length });
+      // Veri ve damga aynı anda yazılır: şubelerin önbelleği yeni ayı damgadan anlar (bkz. ÖNBELLEK)
+      const u = Date.now();
+      await fbDB.ref().update({ ["months/"+month]: { r:packRecords(recs), updated:u, count:recs.length }, ["meta/months/"+month]: u });
     }
     dirty.forEach(f=>{ f.dirty=false; f.cloud=true; });
     st.className="savestatus ok"; st.textContent=`Kaydedildi ✓ (${Object.keys(byMonth).length} ay herkese açık)`;
@@ -6161,7 +6307,8 @@ $("saveTimBtn").onclick = async ()=>{
   const st=$("timStatus");
   st.className="tim-status"; st.textContent="Kaydediliyor…";
   try{
-    await fbDB.ref("tim").set({ map:S.tim, year:S.timYear||"", updated:Date.now() });
+    const u = Date.now();
+    await fbDB.ref().update({ tim: { map:S.tim, year:S.timYear||"", updated:u }, "meta/tim": u });
     S.timDirty=false;
     st.className="tim-status ok"; st.textContent=`✓ İlk 1000 listesi buluta kaydedildi (${Object.keys(S.tim).length} firma).`;
   }catch(e){
@@ -6176,7 +6323,8 @@ $("saveTqBtn").onclick = async ()=>{
   const st=$("tqStatus");
   st.className="tim-status"; st.textContent="Kaydediliyor…";
   try{
-    await fbDB.ref("tq").set({ map:S.tq, updated:Date.now() });
+    const u = Date.now();
+    await fbDB.ref().update({ tq: { map:S.tq, updated:u }, "meta/tq": u });
     S.tqDirty=false;
     st.className="tim-status ok"; st.textContent=`✓ Turquality listesi buluta kaydedildi (${Object.keys(S.tq).length} firma).`;
   }catch(e){

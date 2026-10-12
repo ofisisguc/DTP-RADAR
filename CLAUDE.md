@@ -79,7 +79,13 @@ wrap `filtered()`'s result rather than being folded into it — keep them compos
 listener that mirrors into `S`, and a corresponding writer function (e.g. `deleteMonthFromCloud`,
 `toggleStarForTarget`, admin save handlers around line 2780+) that pushes local edits back. Monthly records
 are compressed for storage via `packRecords()`/`unpackRecords()` (array-of-arrays instead of objects) —
-preserve that shape if you touch the sync path. Firebase config/API key is embedded directly in the file
+preserve that shape if you touch the sync path.
+Since index_151, non-admin users don't listen to `months`/`tim`/`tq`/`addrGeo` directly: they keep a copy in
+IndexedDB and listen only to the tiny `meta` node (`meta/months/<YYYY-MM>`, `meta/tim`, `meta/tq`,
+`meta/addrGeo` timestamps), downloading just the parts whose timestamp changed (`onbellekliYukle()`). Any
+writer of those nodes must bump the matching `meta` stamp in the same multi-path update (admin save/delete
+handlers do; `scripts/geocode.js` and `addrgeo_yedekle.js` bump `meta/addrGeo`). Admin keeps the live
+listeners (`canliVeriDinle()`) and `metaKontrol()` repairs stale stamps whenever an admin is logged in. Firebase config/API key is embedded directly in the file
 (`firebaseConfig` near the top of the script) — this is a client app talking to a public Firebase project;
 don't "fix" this by moving it server-side without being asked, that's a deliberate part of the deployment model.
 

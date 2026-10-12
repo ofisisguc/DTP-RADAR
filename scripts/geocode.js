@@ -305,12 +305,22 @@ async function main() {
   const notFoundList = [];
   const rapor = [];
   let pendingWrite = {};
+  let yazildiMi = false;
 
   const flush = async () => {
     if (DRY || !Object.keys(pendingWrite).length) { pendingWrite = {}; return; }
     await db.ref().update(pendingWrite);
     pendingWrite = {};
+    yazildiMi = true;
   };
+  // Telefonlardaki önbellek bu damgaya bakar: değişince konumları bir kez yeniden indirir (uygulamada ONBELLEK).
+  // Çalıştırma sonunda (ve Ctrl+C ile yarıda kesilirse) bir kez yazılır — her 25 kayıtta değil, yoksa açık
+  // telefonlar çalıştırma boyunca konumları defalarca indirirdi.
+  const damgala = async () => { if (yazildiMi) await db.ref("meta/addrGeo").set(Date.now()); };
+  process.on("SIGINT", async () => {
+    try { await flush(); await damgala(); } catch (e) { console.error(e.message); }
+    process.exit(130);
+  });
 
   for (const a of todo) {
     if (done >= LIMIT) break;
@@ -347,6 +357,7 @@ async function main() {
     await sleep(120);
   }
   await flush();
+  await damgala();
 
   if (notFoundList.length) {
     const outPath = path.join(__dirname, "not_found.json");
