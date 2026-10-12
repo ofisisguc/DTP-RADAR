@@ -850,6 +850,36 @@ select:focus,input:focus{border-color:var(--exp)}
 .savestatus.ok{color:var(--exp)} .savestatus.err{color:var(--danger)}
 .cloudtag{font-size:11px;color:var(--exp);font-family:'IBM Plex Mono',monospace}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.5);display:none;z-index:2000;max-width:92vw}
+/* Geri alınabilir bildirim: hangi firma etkilendi + "Geri al" düğmesi + kalan süre çubuğu (bkz. toast()) */
+.toast.has-undo{align-items:center;gap:12px;width:min(440px,92vw);padding:10px 10px 13px 14px;border-radius:12px;border-color:var(--axis);overflow:hidden}
+.toast-text{flex:1;min-width:0}
+.toast-main{font-size:13.5px;font-weight:600}
+.toast-sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast-undo{flex:0 0 auto;min-height:44px;min-width:88px;padding:0 14px;background:color-mix(in srgb,var(--exp) 12%,transparent);border:1px solid color-mix(in srgb,var(--exp) 45%,transparent);color:var(--exp);border-radius:9px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+.toast-undo:hover{background:color-mix(in srgb,var(--exp) 22%,transparent)}
+.toast-bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--border)}
+.toast-bar i{display:block;height:100%;background:var(--exp);animation:toastbar linear forwards}
+@keyframes toastbar{from{width:100%}to{width:0}}
+/* Sonuç çıkmadığında listenin yerine gelen yönlendirici kart (bkz. emptyResultHTML) */
+.empty-result{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px 18px 18px;text-align:center}
+.empty-result svg.er-radar{display:block;margin:0 auto}
+.er-title{font-family:'Sora',sans-serif;font-weight:700;font-size:15.5px;margin-top:10px}
+.er-body{font-size:13px;color:var(--muted);line-height:1.55;margin:6px auto 14px;max-width:46ch}
+.er-body b{color:var(--text);font-weight:600}
+.er-actions{display:flex;flex-direction:column;gap:8px;max-width:360px;margin:0 auto}
+.er-actions .btn{min-height:44px;font-size:13.5px}
+/* Kullanım rehberi: "kaydırarak hızlı işlem" slaytındaki küçük çizim */
+.onb-swipe{display:flex;flex-direction:column;gap:8px;margin:2px 0 14px;text-align:left}
+.onb-swipe-row{position:relative;height:50px;border-radius:11px;overflow:hidden}
+.onb-swipe-row.add{background:color-mix(in srgb,var(--exp) 18%,transparent)}
+.onb-swipe-row.rm{background:color-mix(in srgb,var(--danger) 16%,transparent)}
+.onb-swipe-act{position:absolute;top:0;bottom:0;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.onb-swipe-row.add .onb-swipe-act{left:12px;color:var(--exp)}
+.onb-swipe-row.rm .onb-swipe-act{right:12px;color:var(--danger)}
+.onb-swipe-card{position:absolute;top:0;bottom:0;width:100%;box-sizing:border-box;background:var(--panel2);border:1px solid var(--border);border-radius:11px;padding:8px 12px;font-size:12.5px;font-weight:600;color:var(--text)}
+.onb-swipe-card small{display:block;font-family:'IBM Plex Mono',monospace;font-size:10.5px;font-weight:400;color:var(--muted);margin-top:2px}
+.onb-swipe-row.add .onb-swipe-card{left:104px}
+.onb-swipe-row.rm .onb-swipe-card{left:-92px;padding-left:104px}
 
 /* Sayfa ilk açılışında Firebase oturum durumu belli olana kadar (kapı mı uygulama mı) gösterilir */
 .initial-load-overlay{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .25s ease}
@@ -1883,7 +1913,7 @@ select:focus,input:focus{border-color:var(--exp)}
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* ================= TEMA (açık/koyu) ================= */
@@ -1977,7 +2007,32 @@ const fmtShort$ = n => {
   if (abs >= 1000) return Math.round(n/1000).toLocaleString("tr-TR") + " Bin$";
   return fmt$(n);
 };
-const toast = msg => { const t=document.getElementById("toast"); t.textContent=msg; t.style.display="block"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none",4200); };
+// toast(mesaj) — eski kullanım aynen geçerli. toast(mesaj, {sub, undo}) verilirse: alt satırda
+// etkilenen firma, sağda "Geri al" düğmesi ve kalan süreyi gösteren çubuk (5 sn) çıkar.
+const TOAST_UNDO_MS = 5000;
+const toast = (msg, opts) => {
+  const t = document.getElementById("toast");
+  clearTimeout(t._h);
+  const undo = opts && typeof opts.undo === "function" ? opts.undo : null;
+  if (!undo){
+    t.className = "toast"; t.textContent = msg; t.style.display = "block";
+    t._h = setTimeout(()=>t.style.display="none", 4200);
+    return;
+  }
+  const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  t.className = "toast has-undo";
+  t.innerHTML = `<div class="toast-text"><div class="toast-main">${esc(msg)}</div>${opts.sub?`<div class="toast-sub">${esc(opts.sub)}</div>`:""}</div>`
+    + `<button type="button" class="toast-undo">Geri al</button>`
+    + `<span class="toast-bar" aria-hidden="true"><i style="animation-duration:${TOAST_UNDO_MS}ms"></i></span>`;
+  t.style.display = "flex";
+  t.querySelector(".toast-undo").onclick = ()=>{
+    clearTimeout(t._h);
+    t.style.display = "none";
+    undo();
+    toast("Geri alındı");
+  };
+  t._h = setTimeout(()=>t.style.display="none", TOAST_UNDO_MS);
+};
 
 /* ================= İKONLAR (emoji yerine — "İnce Çizgi" seti) =================
    Hepsi currentColor kullanır (tema/rozet rengine otomatik uyar), 24x24 grid,
@@ -3116,10 +3171,118 @@ function render(){
       ${open?firmDetailHTML(a, mapsUrl):""}`;
     el.appendChild(div);
   }
+  if (!list.length) renderEmptyResult(el);
   $("showMore").style.display = list.length>S.shown?"":"none";
   // Harita seçim kartı aynı listeden ve aynı çubuk ölçeğinden beslenir ki listedeki kartla birebir aynı görünsün
   renderMapPick(list, maxV);
   if (S.userLoc || S.map) scheduleDrawMap(list);
+}
+
+// Liste boşken (0 firma) boş ekran yerine neden sonuç çıkmadığını söyleyen ve tek dokunuşla çıkış
+// yolu öneren kart: yarıçapı genişlet / tek bir filtreyi kaldır. Her öneri, uygulanırsa kaç firma
+// geleceğini gösterir — sayılar filtered()'ın kendisi geçici değerlerle çalıştırılarak hesaplanır,
+// filtre mantığına hiçbir kopya kural eklenmez.
+function countWithOverride(apply){
+  const restore = apply();
+  try{ return applyManualMerges(filtered()).length; }
+  finally{ restore(); }
+}
+function overrideValue(id, val){
+  return ()=>{ const el=$(id); const old=el.value; el.value=val; return ()=>{ el.value=old; }; };
+}
+function overrideChecked(id){
+  return ()=>{ const el=$(id); const old=el.checked; el.checked=false; return ()=>{ el.checked=old; }; };
+}
+function renderEmptyResult(el){
+  // Konumlar hâlâ hesaplanıyorsa (harita yükleniyor perdesi açık) "sonuç yok" demek erken olur
+  const loadingOv = $("mapLoadingOverlay");
+  if (S.userLoc && !S._visitView && loadingOv && !loadingOv.hidden){
+    el.innerHTML = `<div class="empty er-pending">${radarSpinner(40)}<div>Yakındaki firmalar hesaplanıyor…</div></div>`;
+    return;
+  }
+  const radar = `<svg class="er-radar" width="40" height="40" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19" fill="none" stroke="var(--border)" stroke-width="1.4"/><circle cx="22" cy="22" r="12" fill="none" stroke="var(--border)" stroke-width="1.4"/><circle cx="22" cy="22" r="5" fill="none" stroke="var(--border)" stroke-width="1.4"/><path d="M22 22 L22 3 A19 19 0 0 1 39.5 13.5 Z" fill="var(--exp)" opacity=".45"/><circle cx="22" cy="22" r="1.8" fill="var(--exp)"/></svg>`;
+  const actions = [];
+  let title, body;
+
+  if (S._visitView){
+    // Ziyaret Listem görünümü: listede firma yok (ya da arama/filtre hepsini eledi)
+    const hasVisits = Object.keys(visitMapFor()).length>0;
+    title = hasVisits ? "Ziyaret listende bu aramaya uyan firma yok" : "Ziyaret listende henüz firma yok";
+    body = hasVisits ? "Aramayı ya da filtreleri değiştirerek tekrar dene." : "Bir firmanın kartını açıp <b>Ziyaret Listesine Ekle</b>'ye dokunarak başlayabilirsin.";
+    actions.push({label:"Tüm firmalara dön", primary:true, run:()=>toggleVisitView(false)});
+  } else {
+    const radSel = $("radiusSel");
+    const rad = S.userLoc ? radSel.value : "";
+    const q = $("searchBox").value.trim();
+    const il = $("ilSel").value;
+    const monthSel = $("monthSel");
+    // Aktif filtreler: ad + kaldırınca kaç firma geleceği
+    const filters = [];
+    const escH = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    if (q) filters.push({name:`"${escH(q)}" araması`, label:"Aramayı temizle", apply:overrideValue("searchBox",""),
+      run:()=>{ $("searchBox").value=""; $("searchBox").oninput(); }});
+    if (il) filters.push({name:escH(il), label:`${escH(il)} filtresini kaldır`, apply:overrideValue("ilSel",""),
+      run:()=>{ $("ilSel").value=""; $("ilSel").onchange(); }});
+    if (monthSel.value) filters.push({name:monthSel.options[monthSel.selectedIndex].textContent, label:"Tüm aylara bak", apply:overrideValue("monthSel",""),
+      run:()=>{ monthSel.value=""; monthSel.onchange(); }});
+    [["diibOnly","DİİB"],["timOnly","İlk 1000"],["tqOnly","Turquality"]].forEach(([id,name])=>{
+      if ($(id) && $(id).checked) filters.push({name, label:`${name} filtresini kaldır`, apply:overrideChecked(id),
+        run:()=>{ $(id).checked=false; S.shown=50; render(); }});
+    });
+
+    // 1) Yarıçap: aynı filtrelerle sonuç veren ilk geniş seçenek
+    if (rad){
+      const wider = [...radSel.options].filter(o=>o.value==="" || +o.value>+rad);
+      for (const o of wider){
+        const n = countWithOverride(overrideValue("radiusSel", o.value));
+        if (n>0){
+          const label = o.value ? `${o.value} km'ye genişlet` : "Sınırsız göster";
+          actions.push({label:`${label} · ${n.toLocaleString("tr-TR")} firma`, primary:true,
+            run:()=>{ radSel.value=o.value; radSel.onchange(); }});
+          break;
+        }
+      }
+    }
+    // 2) Filtreler: tek tek kaldırınca sonuç verenlerden en fazla ikisi (fazla seçenek kararı zorlaştırır)
+    const filterActs = filters
+      .map(f=>({...f, n:countWithOverride(f.apply)}))
+      .filter(f=>f.n>0)
+      .sort((a,b)=>b.n-a.n)
+      .slice(0,2)
+      .map(f=>({label:`${f.label} · ${f.n.toLocaleString("tr-TR")} firma`, run:f.run}));
+    actions.push(...filterActs);
+    if (!actions.length && filters.length){
+      actions.push({label:"Tüm filtreleri temizle", run:()=>{
+        $("searchBox").value=""; $("ilSel").value=""; monthSel.value="";
+        ["diibOnly","timOnly","tqOnly"].forEach(id=>{ if ($(id)) $(id).checked=false; });
+        S.shown=50; render();
+      }});
+    }
+    if (actions.length && !actions.some(a=>a.primary)) actions[0].primary = true;
+
+    // Metin: nerede + hangi filtrelerle sonuç yok
+    const filterNames = filters.map(f=>f.name).join(" · ");
+    const fPart = filterNames ? `seçili filtrelere (<b>${filterNames}</b>) uyan firma yok` : "firma yok";
+    if (rad){
+      const yer = S._locSource==="gps" ? "Bulunduğun yerin" : (S.branch ? "Şubenin" : "Seçili şubenin");
+      title = "Bu çevrede firma bulunamadı";
+      body = `${yer} <b>${rad} km</b> çevresinde ${fPart}.`;
+      // En yakın eşleşme: yarıçap olmadan aynı filtreler
+      const restore = overrideValue("radiusSel","")();
+      let nearest = null;
+      try{ for (const a of filtered()){ const d=S.distByKey[a.key]; if (d!==undefined && (nearest===null || d<nearest)) nearest=d; } }
+      finally{ restore(); }
+      if (nearest!==null) body += ` En yakın eşleşme ≈ ${nearest<10?nearest.toFixed(1):Math.round(nearest)} km uzakta.`;
+    } else {
+      title = "Bu filtrelerle firma bulunamadı";
+      body = filterNames ? `Seçili filtrelere (<b>${filterNames}</b>) uyan firma yok.` : "Bu dönem için gösterilecek firma yok.";
+    }
+  }
+
+  el.innerHTML = `<div class="empty-result">${radar}<div class="er-title">${title}</div><p class="er-body">${body}</p>`
+    + (actions.length ? `<div class="er-actions">${actions.map((a,i)=>`<button type="button" class="btn${a.primary?" primary":""}" data-er="${i}">${a.label}</button>`).join("")}</div>` : "")
+    + `</div>`;
+  el.querySelectorAll("[data-er]").forEach(b=>{ b.onclick = e=>{ e.stopPropagation(); actions[+b.dataset.er].run(); }; });
 }
 
 // drawMap() tüm harita işaretleyicilerini komple silip yeniden çiziyor — render() ise arka
@@ -3354,8 +3517,8 @@ function firmDetailHTML(a, mapsUrl){
       const rec = (S.visits[uname]||{})[key];
       // Sağa kaydırma yalnızca listeye ekler; "ziyaret edildi" işareti Ziyaret Listem ekranından yapılır
       if (dx>0){
-        if (!rec){ setVisitStatus(key,"planned"); toast("Ziyaret listesine eklendi"); }
-      } else if (rec){ setVisitStatus(key,null); toast("Ziyaret listesinden kaldırıldı"); }
+        if (!rec) setVisitStatusUndoable(key,"planned");
+      } else if (rec) setVisitStatusUndoable(key,null);
     } else if (horizontal){ swiped = true; }
     reset(true);
     if (swiped) setTimeout(()=>{ swiped=false; }, 400);
@@ -3542,16 +3705,38 @@ async function toggleVisitForBranch(firmKey){
   const uname = ownDataUname();
   if (!uname) return;
   const existing = (S.visits[uname]||{})[firmKey];
-  if (!existing) return setVisitStatus(firmKey, "planned");
-  if (existing.status === "planned") return setVisitStatus(firmKey, "done");
-  return setVisitStatus(firmKey, null);
+  if (!existing) return setVisitStatusUndoable(firmKey, "planned");
+  if (existing.status === "planned") return setVisitStatusUndoable(firmKey, "done");
+  return setVisitStatusUndoable(firmKey, null);
 }
 // Ziyaret durumunu doğrudan yaz: "planned" | "done" | null (listeden kaldır)
 async function setVisitStatus(firmKey, status){
+  return writeVisitRecord(firmKey, status ? { status, ts: Date.now() } : null);
+}
+// Durumu değiştirir ve "Geri al" düğmeli bildirim gösterir; geri alınca önceki kayıt (tarihi dahil)
+// olduğu gibi geri yazılır.
+const VISIT_TOAST_MSG = { planned:"Ziyaret listesine eklendi", done:"Ziyaret edildi olarak işaretlendi" };
+function setVisitStatusUndoable(firmKey, status){
+  const uname = ownDataUname();
+  if (!uname) return;
+  const prev = (S.visits[uname]||{})[firmKey] || null;
+  const p = setVisitStatus(firmKey, status);
+  toast(VISIT_TOAST_MSG[status] || "Ziyaret listesinden kaldırıldı", {
+    sub: firmNameByKey(firmKey),
+    undo: ()=>{ if (ownDataUname()===uname) writeVisitRecord(firmKey, prev); }
+  });
+  return p;
+}
+function firmNameByKey(key){
+  const a = (S._rendered && S._rendered[key]) || aggregate().find(x=>x.key===key);
+  return a ? a.firma : "";
+}
+// Ziyaret kaydını olduğu gibi yaz (rec null ise listeden kaldır) — setVisitStatus ve "Geri al" bunu kullanır
+async function writeVisitRecord(firmKey, rec){
   const uname = ownDataUname();
   if (!uname) return;
   const current = { ...(S.visits[uname]||{}) };
-  if (status) current[firmKey] = { status, ts: Date.now() };
+  if (rec) current[firmKey] = rec;
   else delete current[firmKey];
   S.visits = { ...S.visits, [uname]: current };
   render();
@@ -3851,7 +4036,8 @@ function hideMapLoadingOverlay(){
   const el = $("mapLoadingOverlay"); if (!el || el.hidden) return;
   const MIN_MS = 500; // çok hızlı yüklenirse bile göze "yanıp sönme" gibi gelmesin
   const elapsed = Date.now() - _mapOverlayShownAt;
-  const doHide = ()=>{ el.hidden = true; };
+  // Boş liste "hesaplanıyor" bekleme kartı gösteriyorsa, perde kalkınca gerçek durumu çiz
+  const doHide = ()=>{ el.hidden = true; if (document.querySelector("#firmList .er-pending")) render(); };
   if (elapsed >= MIN_MS) doHide(); else setTimeout(doHide, MIN_MS - elapsed);
 }
 
@@ -4408,21 +4594,32 @@ function renderBranchUI(){
 /* ================= ŞUBE KULLANIM REHBERİ (giriş sonrası slider) ================= */
 const ONBOARD_SLIDES = [
   { icon:"wave", title:"Hoş geldin!",
-    body:`Bu birkaç ekran, <b>Dış Ticaret Radar</b>'ı nasıl kullanacağını anlatıyor. İstersen sağ üstteki <b>${ic('cap')}</b> butonuna basarak bunu istediğin an tekrar açabilirsin.` },
+    body:`Bu birkaç ekran, <b>Dış Ticaret Radar</b>'ı nasıl kullanacağını anlatıyor. Rehberi istediğin an sağ üstteki <b>profil simgesine</b> dokunup <b>Kullanım rehberi</b>'ni seçerek yeniden açabilirsin.` },
   { icon:"pin", title:"Şubene en yakın firmalar",
-    body:"Giriş yapınca harita otomatik olarak <b>şubenin konumuna</b> gelir. Üstteki mesafe kutusundan (≤5km, ≤10km…) çevrendeki firma çemberini genişletip daraltabilirsin." },
+    body:"Giriş yapınca harita otomatik olarak <b>şubenin konumuna</b> gelir. Haritanın üstündeki <b>mesafe düğmesinden</b> (≤ 5 km, ≤ 10 km…) çevrendeki firma çemberini genişletip daraltabilirsin." },
   { icon:"map", title:"Harita ve firma noktaları",
     body:"Haritadaki her nokta bir veya birden çok firmayı temsil eder — büyük nokta, o bölgede çok firma var demektir. Bir firmayı listede açtığında haritada <b>turuncu</b> olarak öne çıkar." },
-  { icon:"search", title:"Arama ve filtreler",
-    body:"Üstteki arama kutusuyla firma adına göre ara. <b>Filtreler</b> butonundan il, sıralama ve DİİB / İlk 1000 / Turquality gibi kaynak filtrelerini aç." },
+  { icon:"search", title:"Arama, sıralama ve filtreler",
+    body:"Arama kutusuyla firma adına göre ara. <b>Sırala</b> düğmesiyle yakınlığa, ihracata ya da ithalata göre sırala; <b>Filtreler</b> düğmesinden dönem, il ve DİİB / İlk 1000 / Turquality filtrelerini aç." },
+  // Kaydırma hareketi yalnızca dokunmatik ekranda çalışır — masaüstünde bu slayt gösterilmez
+  { icon:null, title:"Kaydırarak hızlı işlem", touchOnly:true,
+    body:`<div class="onb-swipe" aria-hidden="true">
+        <div class="onb-swipe-row add"><span class="onb-swipe-act">${ic('bookmark')} Listeye ekle</span><span class="onb-swipe-card">Anadolu Tekstil<small>≈ 2.4 km</small></span></div>
+        <div class="onb-swipe-row rm"><span class="onb-swipe-act">${ic('trash')} Kaldır</span><span class="onb-swipe-card">Marmara Otomotiv<small>≈ 3.1 km</small></span></div>
+      </div>Bir firma kartını <b>sağa</b> kaydır: ziyaret listene eklenir. <b>Sola</b> kaydır: listeden çıkar. Yanlışlıkla mı oldu? Alttaki <b>Geri al</b> düğmesine dokun.` },
   { icon:"medal", title:"Rozetlerin anlamı",
     body:`${ic('starFilled')} = yönetimin şubene özel hedef gösterdiği firma · ${ic('pin')} = senin işaretlediğin önemli firma · ${ic('bookmark')} = ziyaret listene eklediğin firma · ${ic('sparkle')} = bu ay ilk kez belge alan yeni firma.` },
   { icon:"bookmark", title:"Ziyaret Listem",
-    body:"Sağ üstteki <b>Ziyaret Listem</b> butonundan, işaretlediğin firmaları planlanan/ziyaret edilen olarak takip edebilir, listeyi dışa aktarabilirsin." },
+    body:"Eklediğin firmaları <b>profil menüsündeki Ziyaret Listem</b>'den planlanan / ziyaret edilen olarak takip edebilirsin. Haritadaki <b>Ziyaret Listem</b> düğmesi ise yalnızca bu firmaları haritada gösterir." },
 ];
 let _onboardIdx = 0;
+let _onboardSlides = ONBOARD_SLIDES;
+function isTouchDevice(){
+  try{ return window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window; }catch(e){ return false; }
+}
 function openOnboarding(){
   _onboardIdx = 0;
+  _onboardSlides = ONBOARD_SLIDES.filter(s=>!s.touchOnly || isTouchDevice());
   renderOnboardSlide();
   $("onboardOverlay").hidden = false;
 }
@@ -4431,17 +4628,19 @@ function closeOnboarding(){
   maybeShowAnnouncement(); // rehber kapanınca, bekleyen bir duyuru varsa sırası şimdi gelsin
 }
 function renderOnboardSlide(){
-  const s = ONBOARD_SLIDES[_onboardIdx];
-  $("onboardIcon").innerHTML = ic(s.icon);
+  const s = _onboardSlides[_onboardIdx];
+  const last = _onboardIdx===_onboardSlides.length-1;
+  $("onboardIcon").hidden = !s.icon;
+  $("onboardIcon").innerHTML = s.icon ? ic(s.icon) : "";
   $("onboardTitle").textContent = s.title;
   $("onboardBody").innerHTML = s.body;
-  $("onboardDots").innerHTML = ONBOARD_SLIDES.map((_,i)=>`<span class="dot${i===_onboardIdx?" active":""}"></span>`).join("");
+  $("onboardDots").innerHTML = _onboardSlides.map((_,i)=>`<span class="dot${i===_onboardIdx?" active":""}"></span>`).join("");
   $("onboardPrev").hidden = _onboardIdx===0;
-  $("onboardSkip").hidden = _onboardIdx===ONBOARD_SLIDES.length-1;
-  $("onboardNext").innerHTML = _onboardIdx===ONBOARD_SLIDES.length-1 ? `Başla ${ic('check')}` : `İleri ${ic('chevronRight')}`;
+  $("onboardSkip").hidden = last;
+  $("onboardNext").innerHTML = last ? `Başla ${ic('check')}` : `İleri ${ic('chevronRight')}`;
 }
 $("onboardNext").onclick = ()=>{
-  if (_onboardIdx < ONBOARD_SLIDES.length-1){ _onboardIdx++; renderOnboardSlide(); }
+  if (_onboardIdx < _onboardSlides.length-1){ _onboardIdx++; renderOnboardSlide(); }
   else closeOnboarding();
 };
 $("onboardPrev").onclick = ()=>{ if (_onboardIdx>0){ _onboardIdx--; renderOnboardSlide(); } };
