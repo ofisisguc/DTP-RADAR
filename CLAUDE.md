@@ -29,6 +29,8 @@ lets branch employees filter/sort companies by location, import/export volume, a
   `~/.ssh/id_ed25519_ofisisguc`). The user does not want their old personal GitHub account (the machine's
   default `~/.ssh/id_ed25519` identity) involved at all — never push with it, add it, or name it in project files. Repo-local git identity is `ofisisguc` with the GitHub noreply email.
 - Live site branches use: https://dtpradar.netlify.app (Netlify auto-deploys from the GitHub repo on push).
+- The user sometimes continues work in another Claude account (e.g. claude.ai chat) and uploads the result to
+  GitHub through the web UI. Always `git pull` before starting, and re-check the highest `index_NN.html` after.
 
 ## Running / testing
 
