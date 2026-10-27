@@ -63,8 +63,13 @@ distinguished purely by which fake email domain the user's address ends in:
   Also see `ADMIN_TABLE` — display names for the admin usernames below.
 - Admin accounts: `<username>@admin.disticaretradar.local` — username must be listed in `ADMIN_TABLE`.
 `S.isAdmin` is set (in `initFirebase()`'s `onAuthStateChanged` handler) only when the email matches the admin
-domain *and not* the branch domain — this is the sole authorization check, so any change to login/signup
-logic must preserve that mutual exclusivity. `renderGate()` gates the entire app behind `S.user` being non-null.
+domain *and not* the branch domain, and the username is in `ADMIN_TABLE` — preserve that mutual exclusivity.
+This is UI only: since index_153 real authorization is server-side. Each account carries a custom claim
+`{rol: "admin"|"sube"|"grup", u: "<username>"}` set by `scripts/rolleri_ata.js` (admin only for usernames in its
+`ADMIN_LISTESI`), and `scripts/kurallar.json` (applied with `apply_rules.js --dosya=kurallar.json`) grants
+reads/writes from `auth.token.rol` / `auth.token.u`. Public sign-up and self-delete are disabled in Firebase
+Auth settings (2026-10-27); accounts are created in the console, then `rolleri_ata.js` is re-run. Any new RTDB
+path needs a matching rule in `kurallar.json` (root is deny-by-default). `renderGate()` gates the entire app behind `S.user` being non-null.
 
 **Data pipeline**: `handleFiles()` reads uploaded `.xlsx` via SheetJS (`XLSX`), `parseSheet()` locates header
 columns by regex (Turkish column names, handles diacritics/synonyms) and extracts firm/address/VKN/import/

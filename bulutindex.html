@@ -4286,7 +4286,6 @@ const ADMIN_EMAIL_DOMAIN = "admin.disticaretradar.local"; // yönetim hesapları
 const GRUP_EMAIL_DOMAIN = "grup.disticaretradar.local"; // sabit şubesi olmayan departman hesapları için — giriş sonrası istedikleri şubeyi seçerler
 const ADMIN_TABLE = {
   // kullanıcı_adı: "Görünen İsim"
-  "ensar": "Ensar",
   "dtpadmin": "DTP Admin",
 };
 const GRUP_TABLE = {
@@ -4327,7 +4326,9 @@ function initFirebase(){
     // Departman hesabı mı? (sabit şubesi yok — giriş sonrası istediği şubeyi seçer)
     const isGroup = !!user && user.email && user.email.endsWith("@"+GRUP_EMAIL_DOMAIN);
     // Güvenlik: sadece ADMIN_EMAIL_DOMAIN'li hesap admin sayılır; şube/departman hesabı hiçbir koşulda admin olamaz
-    S.isAdmin = isAdminAccount && !isBranch && !isGroup;
+    // Arayüz için: listede olmayan @admin hesabı da admin sayılmaz. Asıl yetki veritabanı kurallarında,
+    // hesaba scripts/rolleri_ata.js ile konan rol etiketine (custom claim) bakılarak verilir.
+    S.isAdmin = isAdminAccount && !isBranch && !isGroup && !!ADMIN_TABLE[user.email.split("@")[0]];
     S.isGroupUser = isGroup && !isBranch && !isAdminAccount;
     // Oturuma özel admin durumunu her giriş/çıkışta sıfırla (önceki oturumdan kalıntı taşınmasın)
     S._starTargetBranch = null;
@@ -4360,9 +4361,20 @@ function initFirebase(){
     renderGate(); // giriş yapılmadan platform hiç görünmesin
     // Bulut verisi yalnızca giriş yapılmışken okunabilir (güvenlik kuralları) — dinleyiciler burada kurulur,
     // çıkışta sökülür ve bellek temizlenir. Şube hesabı sadece KENDİ düğümlerini dinler.
-    if (user){ if (!S._cloudOn) loadCloud(); } else detachCloud();
+    if (user){ if (!S._cloudOn) loadCloud(); rolEtiketiniYenile(user); } else detachCloud();
     hideInitialLoadOverlay(); // Firebase oturum durumu artık belli — kapı/uygulama kararı verildi
   });
+}
+
+// Rol etiketi (custom claim) hesaba sonradan konduysa tarayıcıdaki eski oturum anahtarında yoktur ve
+// kurallar okumaları reddeder. Etiket yoksa anahtarı bir kez tazeleyip, etiket gelmişse sayfayı yeniden yükle.
+function rolEtiketiniYenile(user){
+  user.getIdTokenResult().then(r=>{
+    if (r.claims && r.claims.rol) return;
+    return user.getIdToken(true).then(()=>user.getIdTokenResult()).then(r2=>{
+      if (r2.claims && r2.claims.rol) location.reload();
+    });
+  }).catch(e=>console.warn("Rol etiketi okunamadı:", e.code||e.message));
 }
 
 // Sayfa ilk açılışında Firebase oturum kontrolü bitene kadar gösterilen tam ekran radar —

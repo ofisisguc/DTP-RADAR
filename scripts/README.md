@@ -90,3 +90,28 @@ Firma listesinde mesafe rozetinin yanında:
 - **📍** → tam adres (bu script ile) — en hassas
 - **•** → mahalle bazlı (tarayıcıdan canlı Nominatim sorgusu)
 - rozet yok → ilçe/il merkezi (offline tablo)
+
+# Admin yetkisi: rol etiketleri + veritabanı kuralları
+
+Admin yetkisi artık e-posta uzantısına değil, hesaba konan **rol etiketine** (Firebase custom claim)
+dayanıyor. Etiketi yalnızca servis hesabı anahtarı olan biri koyabilir; `kurallar.json` yazma/okuma
+iznini bu etikete bakarak verir. Yukarıdaki kurulum (servis hesabı anahtarı, `npm install`, `.env`)
+burada da geçerli; Google API anahtarı gerekmez.
+
+**Sıra önemli** — önce etiketler, sonra kurallar:
+
+```bash
+cd scripts
+node rolleri_ata.js --dry                 # kim hangi rolü alacak, sadece rapor
+node rolleri_ata.js                       # etiketleri yazar
+node apply_rules.js --dosya=kurallar.json # eski kuralları current_rules.json'a yedekler, yenileri uygular
+```
+
+Bir sorun çıkarsa `node apply_rules.js --restore` eski kurallara döner.
+
+- Admin olabilecek kullanıcı adları `rolleri_ata.js` içindeki `ADMIN_LISTESI`'nde (şu an yalnızca `dtpadmin`).
+  Yeni admin eklerken hem oraya hem `index_NN.html` içindeki `ADMIN_TABLE`'a ekle.
+- Konsoldan yeni şube/departman hesabı açtığında `node rolleri_ata.js`'i tekrar çalıştır; etiketsiz hesap
+  hiçbir veriyi okuyamaz.
+- index_153'ten itibaren uygulama, etiketi olmayan oturumda anahtarı kendisi tazeler; etiket gelmişse
+  sayfa bir kez yenilenir.

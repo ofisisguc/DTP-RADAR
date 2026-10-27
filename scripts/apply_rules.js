@@ -3,7 +3,7 @@
  * scripts/apply_rules.js — Firebase Realtime Database güvenlik kurallarını uygular.
  * Elle çalıştırılır:  cd scripts && node apply_rules.js
  *   1) Mevcut kuralları scripts/current_rules.json'a yedekler
- *   2) scripts/new_rules.json içindekini uygular
+ *   2) scripts/new_rules.json içindekini uygular (ya da --dosya=kurallar.json ile verilen dosyayı)
  *   3) Uygulanan kuralları geri okuyup doğrular
  * Geri almak için: node apply_rules.js --restore   (current_rules.json'ı geri yükler)
  */
@@ -27,7 +27,8 @@ const cred = admin.credential.cert(require(path.resolve(SA_PATH)));
     console.log("Eski kurallar yedeklendi → scripts/current_rules.json");
   }
 
-  const file = RESTORE ? "current_rules.json" : "new_rules.json";
+  const dosyaArg = process.argv.find(a => a.startsWith("--dosya="));
+  const file = RESTORE ? "current_rules.json" : (dosyaArg ? dosyaArg.slice(8) : "new_rules.json");
   const body = fs.readFileSync(path.join(__dirname, file), "utf8");
   JSON.parse(body); // geçersiz JSON'u göndermeden yakala
 

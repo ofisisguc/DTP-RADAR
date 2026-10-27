@@ -1,0 +1,49 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "months":       { ".read": "auth != null && auth.token.rol != null", ".write": "auth != null && auth.token.rol === 'admin'" },
+    "tim":          { ".read": "auth != null && auth.token.rol != null", ".write": "auth != null && auth.token.rol === 'admin'" },
+    "tq":           { ".read": "auth != null && auth.token.rol != null", ".write": "auth != null && auth.token.rol === 'admin'" },
+    "addrGeo":      { ".read": "auth != null && auth.token.rol != null", ".write": "auth != null && auth.token.rol === 'admin'" },
+    "meta":         { ".read": "auth != null && auth.token.rol != null", ".write": "auth != null && auth.token.rol === 'admin'" },
+    "manualMerges": { ".read": "auth != null && auth.token.rol != null", ".write": "auth != null && auth.token.rol === 'admin'" },
+    "announcement": { ".read": "auth != null && auth.token.rol != null", ".write": "auth != null && auth.token.rol === 'admin'" },
+
+    "starred": {
+      ".read": "auth != null && auth.token.rol === 'admin'",
+      ".write": "auth != null && auth.token.rol === 'admin'",
+      "$u": { ".read": "auth != null && auth.token.u === $u && auth.token.rol === 'sube'" }
+    },
+    "important": {
+      ".read": "auth != null && auth.token.rol === 'admin'",
+      "$u": {
+        ".read": "auth != null && auth.token.u === $u",
+        ".write": "auth != null && auth.token.u === $u && (auth.token.rol === 'sube' || auth.token.rol === 'grup')"
+      }
+    },
+    "visits": {
+      ".read": "auth != null && auth.token.rol === 'admin'",
+      "$u": {
+        ".read": "auth != null && auth.token.u === $u",
+        ".write": "auth != null && auth.token.u === $u && (auth.token.rol === 'sube' || auth.token.rol === 'grup')"
+      }
+    },
+    "loginLogs": {
+      ".read": "auth != null && auth.token.rol === 'admin'",
+      "$u": {
+        "$kayit": {
+          ".write": "auth != null && auth.token.u === $u && auth.token.rol === 'sube' && !data.exists()",
+          ".validate": "newData.hasChildren(['ts']) && newData.child('ts').isNumber()"
+        }
+      }
+    },
+    "announcementViews": {
+      ".read": "auth != null && auth.token.rol === 'admin'",
+      "$duyuru": {
+        "$u": { ".write": "auth != null && auth.token.u === $u && auth.token.rol === 'sube'" }
+      }
+    }
+  }
+}
