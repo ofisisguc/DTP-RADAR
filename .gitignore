@@ -9,3 +9,6 @@ scripts/current_rules.json
 scripts/new_rules.json
 scripts/_extracted_geo.js
 scripts/geocode_run.log
+
+# netlify.toml derleme çıktısı
+yayin/
