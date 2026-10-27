@@ -2386,6 +2386,12 @@ function tqInfo(firma){ const k=normName(firma); return (k in S.tq) ? S.tq[k] : 
 
 /* ================= FILE UI ================= */
 const $ = id => document.getElementById(id);
+// Veritabanından / Excel'den gelen metni HTML'e basmadan önce kaçışla (firma adı, adres, marka…).
+// innerHTML ve Leaflet tooltip'leri metni HTML olarak yorumlar; kaçışsız basılan bir "<img onerror=…>"
+// o sayfayı açan herkesin tarayıcısında kod çalıştırır. Öznitelik içinde de (title="…", data-…="…") güvenli.
+function escH(s){ return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+// Bağlantılar yalnızca http(s) / mailto / tel olabilir; "javascript:" gibi şemalar boş bağlantıya döner
+function safeUrl(u){ const t = String(u??"").trim(); return /^(https?:|mailto:|tel:)/i.test(t) ? t : (t && !/^[a-z][a-z0-9+.-]*:/i.test(t) ? "https://"+t : "#"); }
 $("drop").onclick = ()=>$("fileInput").click();
 // Yüklenmiş kitleler listesi kalabalık olmasın diye varsayılan kapalı — butonla aç/kapa
 $("fileListToggle").onclick = ()=>{
@@ -2474,7 +2480,7 @@ function renderFiles(){
     const row = document.createElement("div"); row.className="filerow";
     const tag = f.cloud && !f.dirty ? `<span class="cloudtag">${ic('cloud')} kayıtlı</span>` : (f.dirty ? `<span class="cloudtag" style="color:var(--imp)">● kaydedilmedi</span>` : "");
     const canCloudDel = S.isAdmin && f.cloud && f.month;
-    row.innerHTML = `<div class="fname">${f.name}</div>
+    row.innerHTML = `<div class="fname">${escH(f.name)}</div>
       <div class="fcount">${f.records.length} kayıt</div>
       ${tag}
       <input type="month" value="${f.month||""}" class="${f.month?"":"missing"}" title="Liste ayı">
@@ -2533,7 +2539,7 @@ function renderDataViewer(){
   if (q) rows = rows.filter(r=>r.some(c=>trUp(c).includes(q)));
   $("dataViewerTitle").textContent = title; $("dataViewerSub").textContent = sub + (q?` · ${rows.length} eşleşme`:"");
   const LIMIT = 300;
-  $("dataViewerBody").innerHTML = `<table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr></thead><tbody>${rows.slice(0,LIMIT).map(r=>`<tr>${r.map((c,i)=>`<td class="${/ithalat|ihracat|İhracat|Sıra|sırası/i.test(cols[i])?"num":""}">${c}</td>`).join("")}</tr>`).join("")}</tbody></table>${rows.length>LIMIT?`<div class="data-viewer-foot">İlk ${LIMIT} satır gösteriliyor · toplam ${rows.length} — daraltmak için ara</div>`:""}`;
+  $("dataViewerBody").innerHTML = `<table><thead><tr>${cols.map(c=>`<th>${escH(c)}</th>`).join("")}</tr></thead><tbody>${rows.slice(0,LIMIT).map(r=>`<tr>${r.map((c,i)=>`<td class="${/ithalat|ihracat|İhracat|Sıra|sırası/i.test(cols[i])?"num":""}">${escH(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>${rows.length>LIMIT?`<div class="data-viewer-foot">İlk ${LIMIT} satır gösteriliyor · toplam ${rows.length} — daraltmak için ara</div>`:""}`;
 }
 $("dataViewerSearch") && $("dataViewerSearch").addEventListener("input", renderDataViewer);
 $("dataViewerClose") && ($("dataViewerClose").onclick = ()=>{ $("dataViewer").hidden = true; S._viewerKey = null; renderMonthChips(); });
@@ -2889,7 +2895,7 @@ function applyManualMerges(list){
 function renderIlOptions(){
   const cur=$("ilSel").value;
   const ils=[...new Set(aggregate().map(a=>a.il).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"tr"));
-  $("ilSel").innerHTML = `<option value="">Tüm iller</option>` + ils.map(i=>`<option ${i===cur?"selected":""}>${i}</option>`).join("");
+  $("ilSel").innerHTML = `<option value="">Tüm iller</option>` + ils.map(i=>`<option ${i===cur?"selected":""}>${escH(i)}</option>`).join("");
   syncFilterSelects();
 }
 
@@ -2953,7 +2959,7 @@ $("mapRadChip") && $("mapRadChip").addEventListener("click", e=>{
   e.stopPropagation();
   const menu = $("mapRadMenu"), sel = $("radiusSel"); if (!menu.hidden){ closeMapChipMenus(); return; }
   closeMapChipMenus();
-  menu.innerHTML = [...sel.options].map(o=>`<button type="button" data-rad="${o.value}" class="${o.value===sel.value?"active":""}">${o.textContent}${o.value===sel.value?" ✓":""}</button>`).join("");
+  menu.innerHTML = [...sel.options].map(o=>`<button type="button" data-rad="${escH(o.value)}" class="${o.value===sel.value?"active":""}">${escH(o.textContent)}${o.value===sel.value?" ✓":""}</button>`).join("");
   menu.querySelectorAll("button").forEach(b=>{ b.onclick = ()=>{ closeMapChipMenus(); sel.value = b.dataset.rad; sel.onchange && sel.onchange(); }; });
   menu.hidden = false;
 });
@@ -3037,7 +3043,7 @@ function renderActiveFilterTags(){
   }
   if (!tags.length){ box.hidden = true; box.innerHTML=""; return; }
   box.hidden = false;
-  box.innerHTML = tags.map((t,i)=>`<span class="active-filter-tag" data-tag-idx="${i}">${t.label} <button type="button" aria-label="Kaldır">×</button></span>`).join("")
+  box.innerHTML = tags.map((t,i)=>`<span class="active-filter-tag" data-tag-idx="${i}">${escH(t.label)} <button type="button" aria-label="Kaldır">×</button></span>`).join("")
     + `<button class="clear-filters-btn" id="clearAllFiltersBtn" type="button">Tümünü temizle</button>`;
   box.querySelectorAll(".active-filter-tag button").forEach((btn,i)=>{
     btn.onclick = ()=>{ tags[i].clear(); S.shown=50; render(); };
@@ -3146,17 +3152,17 @@ function render(){
     const cardIlce = (a.tq && a.tq.ilce) ? trUp(a.tq.ilce) : (a.adres && a.il ? extractIlce(a.adres, a.il) : null);
     const nameParts = splitFirmName(a.firma);
     div.innerHTML = `
-      <div class="firm-head" data-toggle="${a.key}">
-        <div class="firm-top"><div class="firm-name">${isStarredForBranch?`<span class="star-badge" title="Şubeniz için hedef firma">${ic('starFilled')}</span>`:""}${isImportantForBranch?`<span class="important-badge" title="Sizin işaretlediğiniz önemli firma">${ic('pin')}</span>`:""}${adminViewImportant?`<span class="important-badge" title="Bu şube tarafından önemli işaretlenmiş">${ic('pin')}</span>`:""}${visitRec?`<span class="visit-badge visit-${visitRec.status}" title="${visitLabel}">${visitIcon}</span>`:""}${nameParts.main}${nameParts.suffix?`<span class="nm-suffix">${nameParts.suffix}</span>`:""}${newBadgeHTML}${(a.tim||a.tq)?`<span class="badge-row">${a.tim?`<span class="tim-badge" title="TİM İlk 1000 İhracatçı${S.timYear?' '+S.timYear:''}">${ic('trophy')} İlk 1000${a.tim.r<9999?` · #${a.tim.r}`:''}</span>`:""}${a.tq?`<span class="tq-badge" title="${a.tq.prog||'Turquality/Marka Destek'}">${ic('medal')} ${/TURQUALITY/i.test(a.tq.prog)?'Turquality':'Marka Destek'}</span>`:""}</span>`:""}</div>
+      <div class="firm-head" data-toggle="${escH(a.key)}">
+        <div class="firm-top"><div class="firm-name">${isStarredForBranch?`<span class="star-badge" title="Şubeniz için hedef firma">${ic('starFilled')}</span>`:""}${isImportantForBranch?`<span class="important-badge" title="Sizin işaretlediğiniz önemli firma">${ic('pin')}</span>`:""}${adminViewImportant?`<span class="important-badge" title="Bu şube tarafından önemli işaretlenmiş">${ic('pin')}</span>`:""}${visitRec?`<span class="visit-badge visit-${visitRec.status}" title="${visitLabel}">${visitIcon}</span>`:""}${escH(nameParts.main)}${nameParts.suffix?`<span class="nm-suffix">${escH(nameParts.suffix)}</span>`:""}${newBadgeHTML}${(a.tim||a.tq)?`<span class="badge-row">${a.tim?`<span class="tim-badge" title="TİM İlk 1000 İhracatçı${S.timYear?' '+S.timYear:''}">${ic('trophy')} İlk 1000${a.tim.r<9999?` · #${a.tim.r}`:''}</span>`:""}${a.tq?`<span class="tq-badge" title="${escH(a.tq.prog||'Turquality/Marka Destek')}">${ic('medal')} ${/TURQUALITY/i.test(a.tq.prog)?'Turquality':'Marka Destek'}</span>`:""}</span>`:""}</div>
           <div class="firm-top-right">
-            ${ownUname?`<button class="important-pin-toggle${isImportantForBranch?" marked":""}" data-important-key="${a.key}" title="${isImportantForBranch?'Önemli işaretini kaldır':'Önemli olarak işaretle'}">${ic('pin')}</button>`:""}
+            ${ownUname?`<button class="important-pin-toggle${isImportantForBranch?" marked":""}" data-important-key="${escH(a.key)}" title="${isImportantForBranch?'Önemli işaretini kaldır':'Önemli olarak işaretle'}">${ic('pin')}</button>`:""}
             ${S._visitView&&visitRec?`<span class="firm-visit-state ${visitRec.status}">${visitRec.status==="done"?ic('checkCircle')+" Ziyaret edildi":ic('bookmark')+" Planlandı"} · ${fmtVisitDate(visitRec.ts)}</span>`:""}
             ${d!==undefined?`<div class="firm-dist" title="${exact?'Tam adres':(precise?'Mahalle bazlı':'İlçe merkezine göre')}">≈ ${d<10?d.toFixed(1):Math.round(d)} km${exact?` <span class="prec exact">${ic('pin')}</span>`:(precise?' <span class="prec">•</span>':'')}</div>`:""}
           </div>
         </div>
-        <div class="firm-addr">${a.adres|| (a.tq?(a.tq.web?a.tq.web:"Turquality kayıtlı firma"):(a.tim?"Adres yok — sadece İlk 1000 listesinde":"Adres yok"))}</div>
-        <div class="firm-meta">${a.vkn?`VKN ${a.vkn} · `:""}${a.il||"İl —"}${a.belge?` · ${a.belge} belge`:(a.tq?" · Turquality":(a.tim?" · İlk 1000":""))}${a.tq&&a.tq.marka?` · ${a.tq.markalar&&a.tq.markalar.length>1?a.tq.markalar.length+' marka':a.tq.marka}`:""} <span class="firm-caret">⌄</span></div>
-        <div class="firm-loc">${[cardIlce, a.il].filter(Boolean).join(" / ") || "Konum —"} <span class="firm-caret">⌄</span></div>
+        <div class="firm-addr">${a.adres?escH(a.adres): (a.tq?(a.tq.web?escH(a.tq.web):"Turquality kayıtlı firma"):(a.tim?"Adres yok — sadece İlk 1000 listesinde":"Adres yok"))}</div>
+        <div class="firm-meta">${a.vkn?`VKN ${escH(a.vkn)} · `:""}${a.il?escH(a.il):"İl —"}${a.belge?` · ${escH(a.belge)} belge`:(a.tq?" · Turquality":(a.tim?" · İlk 1000":""))}${a.tq&&a.tq.marka?` · ${a.tq.markalar&&a.tq.markalar.length>1?a.tq.markalar.length+' marka':escH(a.tq.marka)}`:""} <span class="firm-caret">⌄</span></div>
+        <div class="firm-loc">${escH([cardIlce, a.il].filter(Boolean).join(" / ") || "Konum —")} <span class="firm-caret">⌄</span></div>
         ${(a.imp||a.exp)?`<div class="flow">
           <div class="bar bimp" style="width:${Math.min(100, a.imp/maxV*100).toFixed(1)}%"></div>
           <div class="axis"></div>
@@ -3166,7 +3172,7 @@ function render(){
           <span class="fn"><span class="fn-tag tag-imp">↓ İthalat</span> <span class="n-imp n-full">${fmt$(a.imp)}</span><span class="n-imp n-short">${fmtShort$(a.imp)}</span></span>
           <span class="fn fn-r"><span class="n-exp n-full">${fmt$(a.exp)}</span><span class="n-exp n-short">${fmtShort$(a.exp)}</span> <span class="fn-tag tag-exp">İhracat ↑</span></span>
         </div>`:`<div class="no-diib">DİİB belgesi bu dönemde yok${a.tq?" · Turquality havuzundan":(a.tim?" · İlk 1000 havuzundan":"")}</div>`}
-        ${starAssignMode?`<button class="star-assign-btn${isStarredForTarget?" starred":""}" data-star-key="${a.key}">${isStarredForTarget?ic('starFilled')+" Yıldızlı (kaldırmak için tıkla)":ic('star')+" Bu şube için yıldızla"}</button>`:""}
+        ${starAssignMode?`<button class="star-assign-btn${isStarredForTarget?" starred":""}" data-star-key="${escH(a.key)}">${isStarredForTarget?ic('starFilled')+" Yıldızlı (kaldırmak için tıkla)":ic('star')+" Bu şube için yıldızla"}</button>`:""}
       </div>
       ${open?firmDetailHTML(a, mapsUrl):""}`;
     el.appendChild(div);
@@ -3218,7 +3224,6 @@ function renderEmptyResult(el){
     const monthSel = $("monthSel");
     // Aktif filtreler: ad + kaldırınca kaç firma geleceği
     const filters = [];
-    const escH = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
     if (q) filters.push({name:`"${escH(q)}" araması`, label:"Aramayı temizle", apply:overrideValue("searchBox",""),
       run:()=>{ $("searchBox").value=""; $("searchBox").oninput(); }});
     if (il) filters.push({name:escH(il), label:`${escH(il)} filtresini kaldır`, apply:overrideValue("ilSel",""),
@@ -3364,7 +3369,7 @@ function enhanceFilterSelect(selectId, labelText, searchPlaceholder){
     const qq = trUp(q||"").trim();
     const opts = [...sel.options].filter(o=>!qq || trUp(o.textContent).includes(qq));
     list.innerHTML = opts.length
-      ? opts.map(o=>`<div class="fsel-item${o.value===sel.value?" sel":""}" data-v="${o.value.replace(/"/g,"&quot;")}"><span class="fsel-dot"></span>${o.textContent}</div>`).join("")
+      ? opts.map(o=>`<div class="fsel-item${o.value===sel.value?" sel":""}" data-v="${escH(o.value)}"><span class="fsel-dot"></span>${escH(o.textContent)}</div>`).join("")
       : `<div class="fsel-empty">Eşleşen yok</div>`;
     list.querySelectorAll(".fsel-item").forEach(el=>{
       el.addEventListener("click", ()=>{
@@ -3406,7 +3411,7 @@ function firmDetailHTML(a, mapsUrl){
     <div class="det-row">
       <div class="det-label">${label}</div>
       <div class="det-value${big?" big":""}">${value||"—"}</div>
-      ${copyVal?`<button class="copy-btn" data-copy="${copyVal}" title="Kopyala">Kopyala</button>`:""}
+      ${copyVal?`<button class="copy-btn" data-copy="${escH(copyVal)}" title="Kopyala">Kopyala</button>`:""}
     </div>`;
   // Ziyaret Listesi durumu: şube/departman kendi listesi, admin önizlerken şubenin listesini salt okunur görür
   const ownUnameDet = ownDataUname();
@@ -3422,33 +3427,33 @@ function firmDetailHTML(a, mapsUrl){
   // İlçe: Turquality kaydında varsa oradan, yoksa adres metninden çıkar
   const ilce = (a.tq && a.tq.ilce) ? trUp(a.tq.ilce) : (a.adres && a.il ? extractIlce(a.adres, a.il) : null);
   return `<div class="firm-detail">
-    ${row("Vergi No (VKN)", a.vkn||"<span class='muted'>Listede yok</span>", a.vkn||"", true)}
-    ${row("Firma", a.firma, a.firma)}
-    ${a.adres?row("Adres", a.adres, a.adres):""}
-    ${row("İl", a.il||"—")}
-    ${ilce?row("İlçe", ilce):""}
+    ${row("Vergi No (VKN)", a.vkn?escH(a.vkn):"<span class='muted'>Listede yok</span>", a.vkn||"", true)}
+    ${row("Firma", escH(a.firma), a.firma)}
+    ${a.adres?row("Adres", escH(a.adres), a.adres):""}
+    ${row("İl", a.il?escH(a.il):"—")}
+    ${ilce?row("İlçe", escH(ilce)):""}
     ${a.tim?row("İlk 1000 İhracatçı", `<span class='tim-inline'>${ic('trophy')} ${a.tim.r<9999?`Genel #${a.tim.r}`:'Listede'}${a.tim.s?` · Sektör #${a.tim.s}`:''}${S.timYear?` (${S.timYear})`:''}</span>`):""}
-    ${a.tim&&a.tim.n?row("Sektör", a.tim.n):""}
+    ${a.tim&&a.tim.n?row("Sektör", escH(a.tim.n)):""}
     ${a.tim&&a.tim.e?row(`${S.timYear||'2025'} ihracatı (TİM)`, `<span class='tim-inline'>${fmtM(a.tim.e)}</span>`):""}
-    ${a.tq?row("Turquality", `<span class='tq-inline'>${ic('medal')} ${a.tq.prog||'Destek programı'}${a.tq.kat?` · ${a.tq.kat}`:''}</span>`):""}
-    ${(!a.tim||!a.tim.n)&&a.tq&&a.tq.sektor?row("Sektör", a.tq.sektor):""}
-    ${a.tq&&(a.tq.markalar&&a.tq.markalar.length)?row(a.tq.markalar.length>1?"Markalar":"Marka", a.tq.markalar.join(", ")):""}
-    ${a.tq&&a.tq.tel?row("Telefon", `<a href="tel:${a.tq.tel.replace(/\s/g,'')}">${a.tq.tel}</a>`, a.tq.tel):""}
-    ${a.tq&&a.tq.email?row("E-posta", `<a href="mailto:${a.tq.email}">${a.tq.email}</a>`, a.tq.email):""}
-    ${a.tq&&a.tq.web?row("Web", `<a href="${/^https?:/.test(a.tq.web)?a.tq.web:'https://'+a.tq.web}" target="_blank" rel="noopener">${a.tq.web.replace(/^https?:\/\//,'')}</a>`, a.tq.web):""}
+    ${a.tq?row("Turquality", `<span class='tq-inline'>${ic('medal')} ${escH(a.tq.prog||'Destek programı')}${a.tq.kat?` · ${escH(a.tq.kat)}`:''}</span>`):""}
+    ${(!a.tim||!a.tim.n)&&a.tq&&a.tq.sektor?row("Sektör", escH(a.tq.sektor)):""}
+    ${a.tq&&(a.tq.markalar&&a.tq.markalar.length)?row(a.tq.markalar.length>1?"Markalar":"Marka", escH(a.tq.markalar.join(", "))):""}
+    ${a.tq&&a.tq.tel?row("Telefon", `<a href="tel:${escH(a.tq.tel.replace(/\s/g,''))}">${escH(a.tq.tel)}</a>`, a.tq.tel):""}
+    ${a.tq&&a.tq.email?row("E-posta", `<a href="mailto:${escH(a.tq.email)}">${escH(a.tq.email)}</a>`, a.tq.email):""}
+    ${a.tq&&a.tq.web?row("Web", `<a href="${escH(safeUrl(a.tq.web))}" target="_blank" rel="noopener">${escH(a.tq.web.replace(/^https?:\/\//,''))}</a>`, a.tq.web):""}
     ${(a.imp||a.exp||a.belge)?row("Öngörülen ithalat", `<span class='n-imp'>${fmt$(a.imp)}</span>`):""}
     ${(a.imp||a.exp||a.belge)?row("Öngörülen ihracat", `<span class='n-exp'>${fmt$(a.exp)}</span>`):""}
     ${a.belge?`<button class="det-toggle" type="button">
       <div class="det-label">Belge sayısı</div>
-      <div class="det-value"><span class="count-badge">${a.belge} belge</span><span class="car">⌄</span></div>
+      <div class="det-value"><span class="count-badge">${escH(a.belge)} belge</span><span class="car">⌄</span></div>
     </button>
     <div class="belge-panel">${belgeListHTML(a)}</div>`:""}
     ${d!==undefined?row("Yaklaşık mesafe", (d<10?d.toFixed(1):Math.round(d))+" km"):""}
     <div class="det-actions">
-      <a class="maps-link" href="${mapsUrl}" target="_blank" rel="noopener">${ic('pin')} Yol tarifi</a>
-      ${a.vkn?`<button class="copy-btn wide" data-copy="${a.vkn}">VKN'yi kopyala</button>`:""}
+      <a class="maps-link" href="${escH(mapsUrl)}" target="_blank" rel="noopener">${ic('pin')} Yol tarifi</a>
+      ${a.vkn?`<button class="copy-btn wide" data-copy="${escH(a.vkn)}">VKN'yi kopyala</button>`:""}
     </div>
-    ${ownUnameDet?`<button class="visit-detail-btn${visitBtnClass}" data-visit-key="${a.key}"${visitRec?' data-visit-goto="1"':''}>${visitBtnLabel}</button>`:""}
+    ${ownUnameDet?`<button class="visit-detail-btn${visitBtnClass}" data-visit-key="${escH(a.key)}"${visitRec?' data-visit-goto="1"':''}>${visitBtnLabel}</button>`:""}
   </div>`;
 }
 
@@ -3634,13 +3639,13 @@ function buildBulkStarPlan(rows, fileName){
   const unB = Object.entries(unBranch).sort((a,b)=>b[1]-a[1]);
   box.innerHTML = `
     <div class="bulk-star-stats">
-      <span>${fileName} · ${total} satır</span>
+      <span>${escH(fileName)} · ${total} satır</span>
       <span class="ok">${ic('starFilled')} ${stars} yıldız · ${Object.keys(plan).length} şube</span>
       ${unB.length?`<span class="warn">${unB.reduce((n,[,c])=>n+c,0)} satırda şube tanınmadı</span>`:""}
       ${unFirm.length?`<span class="warn">${unFirm.length} firma sistemde bulunamadı</span>`:""}
     </div>
-    ${unB.length?`<div class="bulk-star-list">${unB.map(([n,c])=>`<b>${n}</b> → şube tanınmadı · ${c} satır`).join("<br>")}</div>`:""}
-    ${unFirm.length?`<div class="bulk-star-list">${unFirm.slice(0,40).map(x=>`${x} → sistemde böyle bir VKN/firma yok`).join("<br>")}${unFirm.length>40?`<br>… ve ${unFirm.length-40} tane daha`:""}</div>`:""}
+    ${unB.length?`<div class="bulk-star-list">${unB.map(([n,c])=>`<b>${escH(n)}</b> → şube tanınmadı · ${c} satır`).join("<br>")}</div>`:""}
+    ${unFirm.length?`<div class="bulk-star-list">${unFirm.slice(0,40).map(x=>`${escH(x)} → sistemde böyle bir VKN/firma yok`).join("<br>")}${unFirm.length>40?`<br>… ve ${unFirm.length-40} tane daha`:""}</div>`:""}
     <div class="bulk-star-actions">
       <button class="btn primary" type="button" id="bulkStarSave" ${stars?"":"disabled"}>${ic('starFilled')} ${stars} yıldızı kaydet</button>
       <label><input type="checkbox" id="bulkStarClear"> Önce bu şubelerin mevcut yıldızlarını temizle</label>
@@ -3793,12 +3798,12 @@ function renderVisitListScreen(){
   body.innerHTML = entries.map(({key,rec,firm})=>`
     <div class="visit-item">
       <div class="visit-item-main">
-        <div class="visit-item-name">${rec.status==="done"?ic('checkCircle'):ic('bookmark')} ${firm.firma}</div>
-        <div class="visit-item-addr">${firm.adres || firm.il || "—"}</div>
+        <div class="visit-item-name">${rec.status==="done"?ic('checkCircle'):ic('bookmark')} ${escH(firm.firma)}</div>
+        <div class="visit-item-addr">${escH(firm.adres || firm.il || "—")}</div>
         <div class="visit-item-date">${rec.status==="done"?"Ziyaret edildi":"Planlandı"} · ${fmtDate(rec.ts)}</div>
       </div>
       <div class="visit-item-actions">
-        <button class="visit-detail-btn${rec.status==="planned"?" visit-planned":" visit-done"}" data-visit-key="${key}" style="margin-top:0">${rec.status==="planned"?ic('checkCircle')+" Edildi olarak işaretle":ic('trash')+" Listeden kaldır"}</button>
+        <button class="visit-detail-btn${rec.status==="planned"?" visit-planned":" visit-done"}" data-visit-key="${escH(key)}" style="margin-top:0">${rec.status==="planned"?ic('checkCircle')+" Edildi olarak işaretle":ic('trash')+" Listeden kaldır"}</button>
       </div>
     </div>`).join("");
 }
@@ -4079,8 +4084,8 @@ function drawMap(list){
     // Etiket: şube girişinde şube adı, admin önizlemesinde önizlenen şube adı, yoksa genel "Konumun"
     // "Şu anki konumum" seçiliyse şube adı yerine "Buradayım"
     const locName = S._locSource==="gps" ? "Buradayım" : (S.branch ? S.branch.name : (S._adminViewBranch && SUBE_TABLE[S._adminViewBranch] ? SUBE_TABLE[S._adminViewBranch][0] : "Konumun"));
-    const me = L.marker([S.userLoc.lat,S.userLoc.lon],{icon:USER_LOC_ICON}).addTo(S.map).bindPopup(`<b>${locName}</b>`);
-    me.bindTooltip(locName, {permanent:true, direction:"top", offset:[0,-26], className:"ov-branch-label"});
+    const me = L.marker([S.userLoc.lat,S.userLoc.lon],{icon:USER_LOC_ICON}).addTo(S.map).bindPopup(`<b>${escH(locName)}</b>`);
+    me.bindTooltip(escH(locName), {permanent:true, direction:"top", offset:[0,-26], className:"ov-branch-label"});
     S.mapLayers.push(halo, me);
     pts.push([S.userLoc.lat,S.userLoc.lon]);
   }
@@ -4134,14 +4139,14 @@ function drawMap(list){
     if (vm && !isSelected && firms.length===1){
       // Ziyaret görünümünde her nokta adıyla etiketli
       const np0 = splitFirmName(firms[0].firma);
-      m.bindTooltip(np0.main.length>40 ? np0.main.slice(0,38)+"…" : np0.main, {permanent:true, direction:"top", offset:[0,-(rr+4)], className:"ov-branch-label"});
+      m.bindTooltip(escH(np0.main.length>40 ? np0.main.slice(0,38)+"…" : np0.main), {permanent:true, direction:"top", offset:[0,-(rr+4)], className:"ov-branch-label"});
     }
     if (isSelected){
       m.bringToFront();
       if (firms.length===1){
         const np = splitFirmName(firms[0].firma);
         const mainNm = np.main.length>40 ? np.main.slice(0,38)+"…" : np.main;
-        const nm = mainNm + (np.suffix ? ` <span class="nm-suffix-map">${np.suffix}</span>` : "");
+        const nm = escH(mainNm) + (np.suffix ? ` <span class="nm-suffix-map">${escH(np.suffix)}</span>` : "");
         m.bindTooltip(nm, {permanent:true, direction:"top", offset:[0,-(rr+4)], className:"ov-branch-label"});
       }
     }
@@ -4196,12 +4201,12 @@ function renderMapPick(list, maxV){
   const nameParts = splitFirmName(a.firma);
   $("mapPickCard").innerHTML = `
     <div class="firm-top">
-      <div class="firm-name">${nameParts.main}${nameParts.suffix?`<span class="nm-suffix">${nameParts.suffix}</span>`:""}${(a.tim||a.tq)?`<span class="badge-row">${a.tim?`<span class="tim-badge" title="TİM İlk 1000 İhracatçı${S.timYear?' '+S.timYear:''}">${ic('trophy')} İlk 1000${a.tim.r<9999?` · #${a.tim.r}`:''}</span>`:""}${a.tq?`<span class="tq-badge" title="${a.tq.prog||'Turquality/Marka Destek'}">${ic('medal')} ${/TURQUALITY/i.test(a.tq.prog)?'Turquality':'Marka Destek'}</span>`:""}</span>`:""}</div>
+      <div class="firm-name">${escH(nameParts.main)}${nameParts.suffix?`<span class="nm-suffix">${escH(nameParts.suffix)}</span>`:""}${(a.tim||a.tq)?`<span class="badge-row">${a.tim?`<span class="tim-badge" title="TİM İlk 1000 İhracatçı${S.timYear?' '+S.timYear:''}">${ic('trophy')} İlk 1000${a.tim.r<9999?` · #${a.tim.r}`:''}</span>`:""}${a.tq?`<span class="tq-badge" title="${escH(a.tq.prog||'Turquality/Marka Destek')}">${ic('medal')} ${/TURQUALITY/i.test(a.tq.prog)?'Turquality':'Marka Destek'}</span>`:""}</span>`:""}</div>
       <div class="firm-top-right">${d!==undefined?`<div class="firm-dist" title="${exact?'Tam adres':(precise?'Mahalle bazlı':'İlçe merkezine göre')}">≈ ${d<10?d.toFixed(1):Math.round(d)} km${exact?` <span class="prec exact">${ic('pin')}</span>`:(precise?' <span class="prec">•</span>':'')}</div>`:""}</div>
     </div>
-    <div class="firm-addr">${a.adres|| (a.tq?(a.tq.web?a.tq.web:"Turquality kayıtlı firma"):(a.tim?"Adres yok — sadece İlk 1000 listesinde":"Adres yok"))}</div>
-    <div class="firm-meta">${a.vkn?`VKN ${a.vkn} · `:""}${a.il||"İl —"}${a.belge?` · ${a.belge} belge`:(a.tq?" · Turquality":(a.tim?" · İlk 1000":""))}</div>
-    <div class="firm-loc">${[cardIlce, a.il].filter(Boolean).join(" / ") || "Konum —"}</div>
+    <div class="firm-addr">${a.adres?escH(a.adres): (a.tq?(a.tq.web?escH(a.tq.web):"Turquality kayıtlı firma"):(a.tim?"Adres yok — sadece İlk 1000 listesinde":"Adres yok"))}</div>
+    <div class="firm-meta">${a.vkn?`VKN ${escH(a.vkn)} · `:""}${a.il?escH(a.il):"İl —"}${a.belge?` · ${escH(a.belge)} belge`:(a.tq?" · Turquality":(a.tim?" · İlk 1000":""))}</div>
+    <div class="firm-loc">${escH([cardIlce, a.il].filter(Boolean).join(" / ") || "Konum —")}</div>
     ${(a.imp||a.exp)?`<div class="flow">
       <div class="bar bimp" style="width:${Math.min(100, a.imp/maxV*100).toFixed(1)}%"></div>
       <div class="axis"></div>
@@ -4218,9 +4223,9 @@ function renderMapPick(list, maxV){
   rest.innerHTML = digerleri.map(({k,no})=>{
     const f = byKey.get(k);
     const fd = S.distByKey[k];
-    return `<div class="mpr" data-pick-key="${k}">
+    return `<div class="mpr" data-pick-key="${escH(k)}">
       <span class="mpr-no">${no}</span>
-      <span class="mpr-nm">${splitFirmName(f.firma).main}</span>
+      <span class="mpr-nm">${escH(splitFirmName(f.firma).main)}</span>
       ${fd!==undefined?`<span class="mpr-km">≈ ${fd<10?fd.toFixed(1):Math.round(fd)} km</span>`:""}
       <span class="mpr-v">${fmtShort$(f.exp)}</span>
     </div>`;
@@ -4905,9 +4910,9 @@ function renderKonumDenetim(){
       const e = GEO_TIP_ETIKET[x.tip];
       return `<tr>
         <td><span class="geo-rozet ${e.sinif}">${e.ad}</span></td>
-        <td class="name">${x.firma}</td>
-        <td class="geo-adres">${[x.ilce, x.il].filter(Boolean).join(" / ") || "—"}</td>
-        <td class="geo-adres">${x.gelen || "<i>kayıt yok</i>"}</td>
+        <td class="name">${escH(x.firma)}</td>
+        <td class="geo-adres">${escH([x.ilce, x.il].filter(Boolean).join(" / ") || "—")}</td>
+        <td class="geo-adres">${x.gelen ? escH(x.gelen) : "<i>kayıt yok</i>"}</td>
         <td class="num">${x.km!=null ? x.km.toFixed(1)+" km" : "—"}</td>
       </tr>`;
     }).join("")}</tbody></table>
@@ -5200,8 +5205,8 @@ function renderOvBranchFirmList(uname){
     box.innerHTML = shown.map(({a,d})=>{
       const starred = S.starred[uname] && S.starred[uname][a.key];
       return `<div class="ov-firm-row">
-        <button class="star-toggle${starred?" starred":""}" data-star-key="${a.key}" title="${starred?'Yıldızı kaldır':'Bu şube için yıldızla'}">${ic(starred?'starFilled':'star')}</button>
-        <span class="name">${a.firma}</span>
+        <button class="star-toggle${starred?" starred":""}" data-star-key="${escH(a.key)}" title="${starred?'Yıldızı kaldır':'Bu şube için yıldızla'}">${ic(starred?'starFilled':'star')}</button>
+        <span class="name">${escH(a.firma)}</span>
         <span class="dist">${d<10?d.toFixed(1):Math.round(d)} km</span>
         <span class="flows">İhr ${fmt$(a.exp)} · İth ${fmt$(a.imp)}</span>
       </div>`;
@@ -5289,14 +5294,14 @@ function renderDuplicateSuggestions(){
       const openA = S._dupOpen.has(s.a.key), openB = S._dupOpen.has(s.b.key);
       return `<div class="dup-row">
         <div class="dup-names">
-          <button class="dup-name${openA?" open":""}" type="button" data-dup-open="${s.a.key}">${nmA.main}${nmA.suffix?`<span class="nm-suffix">${nmA.suffix}</span>`:""}<span class="dup-src">${dupSrcTag(s.a)}</span></button>
+          <button class="dup-name${openA?" open":""}" type="button" data-dup-open="${escH(s.a.key)}">${escH(nmA.main)}${nmA.suffix?`<span class="nm-suffix">${escH(nmA.suffix)}</span>`:""}<span class="dup-src">${dupSrcTag(s.a)}</span></button>
           <div class="dup-vs">↔</div>
-          <button class="dup-name${openB?" open":""}" type="button" data-dup-open="${s.b.key}">${nmB.main}${nmB.suffix?`<span class="nm-suffix">${nmB.suffix}</span>`:""}<span class="dup-src">${dupSrcTag(s.b)}</span></button>
+          <button class="dup-name${openB?" open":""}" type="button" data-dup-open="${escH(s.b.key)}">${escH(nmB.main)}${nmB.suffix?`<span class="nm-suffix">${escH(nmB.suffix)}</span>`:""}<span class="dup-src">${dupSrcTag(s.b)}</span></button>
         </div>
-        <div class="dup-why">${s.why}${s.conf==="high"?` · <span class="dup-conf-high">güçlü eşleşme</span>`:` · <span class="dup-conf-med">emin değilim</span>`}</div>
+        <div class="dup-why">${escH(s.why)}${s.conf==="high"?` · <span class="dup-conf-high">güçlü eşleşme</span>`:` · <span class="dup-conf-med">emin değilim</span>`}</div>
         <div class="dup-acts">
-          <button class="btn primary" type="button" data-dup-merge="${s.a.key}|${s.b.key}">Birleştir</button>
-          <button class="btn ghost" type="button" data-dup-skip="${s.pairId}">Farklı firma</button>
+          <button class="btn primary" type="button" data-dup-merge="${escH(s.a.key)}|${escH(s.b.key)}">Birleştir</button>
+          <button class="btn ghost" type="button" data-dup-skip="${escH(s.pairId)}">Farklı firma</button>
         </div>
         ${openA?dupFirmDetailBlock(s.a):""}
         ${openB?dupFirmDetailBlock(s.b):""}
@@ -5369,8 +5374,8 @@ function renderMergeFirmList(){
     const srcTags = [a.src?.diib?"DİİB":"", a.src?.tim?"İlk1000":"", a.src?.tq?"TQ":""].filter(Boolean).join("+");
     const selected = S._mergeSelected.includes(a.key);
     return `<label class="merge-firm-row${selected?" selected":""}">
-      <input type="checkbox" data-merge-key="${a.key}" ${selected?"checked":""}>
-      <span class="merge-firm-name">${a.firma}</span>
+      <input type="checkbox" data-merge-key="${escH(a.key)}" ${selected?"checked":""}>
+      <span class="merge-firm-name">${escH(a.firma)}</span>
       <span class="merge-firm-src">${srcTags}</span>
     </label>`;
   }).join("");
@@ -5653,10 +5658,10 @@ function renderAnnouncementAdmin(){
 
   box.innerHTML = `<div class="ann-current-head"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--exp)"><path d="M3 11v3a1 1 0 001 1h2l4 4V6L6 10H4a1 1 0 00-1 1z"/><path d="M15 8a4 4 0 010 8M18.5 5.5a8 8 0 010 13"/></svg><b>Yayında</b></div>
     <div class="ann-current-body">
-      <img src="${a.imageData}" alt="">
+      <img src="${/^data:image\//.test(a.imageData||"")?escH(a.imageData):""}" alt="">
       <div class="ann-current-meta">
-        Link: <a href="${a.link}" target="_blank" rel="noopener">${a.link}</a><br>
-        Hedef: ${ANN_TARGET_LABEL[a.target] || a.target} (${eligible.length} şube)<br>
+        Link: <a href="${escH(safeUrl(a.link))}" target="_blank" rel="noopener">${escH(a.link)}</a><br>
+        Hedef: ${ANN_TARGET_LABEL[a.target] || escH(a.target)} (${eligible.length} şube)<br>
         Yayın tarihi: ${date}<br>
         <button class="btn" type="button" id="annEndBtn" style="margin-top:8px">Kampanyayı bitir</button>
       </div>
@@ -5686,7 +5691,7 @@ function maybeShowAnnouncement(){
   if ($("onboardOverlay") && !$("onboardOverlay").hidden) return;
   try{ if (localStorage.getItem("dtr-ann-seen-"+a.id)) return; }catch(e){}
   $("annOverlayImg").src = a.imageData;
-  $("annOverlayLink").href = a.link;
+  $("annOverlayLink").href = safeUrl(a.link);
   $("annOverlay").hidden = false;
   // Görüldüğü anda kaydedilir (action henüz yok); kapatma/tıklama ayrıca işaretlenir —
   // yönetim böylece "gördü ama kapattı" ile "gördü ve tıkladı"yı ayırt edebilir.

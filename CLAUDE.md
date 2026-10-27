@@ -104,3 +104,9 @@ in `S.geoCache` and rate-limited through `S.geoQueue`/`S.geoBusy`.
 - CSS custom properties (`--bg`, `--panel`, `--text`, etc.) on `:root` and `[data-theme="light"]` drive
   theming; add new colors as variables in both blocks rather than hardcoding hex values in component rules.
 - `$(id)` is a shorthand for `document.getElementById(id)` — used throughout instead of `querySelector`.
+- Since index_152, any text that comes from the database or an uploaded Excel (firm name, address, il/ilçe,
+  marka, sektör, announcement link, firm keys in `data-*` attributes, Leaflet tooltip text) must go through
+  `escH()` before it is put into `innerHTML`/template HTML, and user-supplied links through `safeUrl()`.
+  Both are defined right after `$`. Hardcoded tables (`SUBE_TABLE`, labels) don't need it.
+- `admin-kurulum.html` (one-off admin account setup page with plaintext passwords) was removed from the repo in
+  index_152; never commit passwords or recreate it in the published folder.
