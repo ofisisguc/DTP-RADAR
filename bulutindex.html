@@ -1214,9 +1214,8 @@ select:focus,input:focus{border-color:var(--exp)}
 .hidden-note[hidden]{display:none}
 .hidden-note b{color:var(--text)}
 @media(max-width:560px){
-  /* Liste önce: harita kısa, istenince büyür */
-  #map{height:190px!important;transition:height .25s ease}
-  .map-container-wrap.big #map{height:62vh!important}
+  /* Harita eski yüksekliğinde (300 px); "Haritayı büyüt" ile ekranın büyük kısmına açılır */
+  .map-container-wrap.big #map{height:62vh!important;transition:height .25s ease}
   .leaflet-control-zoom{display:none}
   .map-chip-expand{display:flex;right:10px;bottom:10px;left:auto;top:auto}
   .map-chip{min-height:40px}
