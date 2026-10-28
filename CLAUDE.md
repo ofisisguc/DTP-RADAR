@@ -84,7 +84,7 @@ wrap `filtered()`'s result rather than being folded into it — keep them compos
 
 **Cloud sync (Firebase Realtime Database)**, wired in `loadCloud()`: each top-level RTDB path
 (`months/<YYYY-MM>`, `tim`, `tq`, `starred/<branchUsername>`, `important/<branchUsername>`,
-`visits/<branchUsername>`, `manualMerges`, `loginLogs/<branchUsername>`) has a live `.on("value", …)`
+`visits/<branchUsername>`, `hidden/<branchUsername>` (firms a branch hid from its own list, `{ts, neden}`), `manualMerges`, `loginLogs/<branchUsername>`) has a live `.on("value", …)`
 listener that mirrors into `S`, and a corresponding writer function (e.g. `deleteMonthFromCloud`,
 `toggleStarForTarget`, admin save handlers around line 2780+) that pushes local edits back. Monthly records
 are compressed for storage via `packRecords()`/`unpackRecords()` (array-of-arrays instead of objects) —

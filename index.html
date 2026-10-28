@@ -34,15 +34,15 @@
 <style>
 :root{
   --bg:#0D1220; --panel:#151C2E; --panel2:#1B2438; --border:#26304A;
-  --text:#E9EDF6; --muted:#8B96AF; --faint:#5A6480;
+  --text:#E9EDF6; --muted:#8B96AF; --faint:#7E89A6;
   --imp:#E8A33D; --exp:#35C4A8; --danger:#E06060; --axis:#3A4664;
   --sticky-bg: rgba(13,18,32,.82);
   color-scheme:dark;
 }
 [data-theme="light"]{
   --bg:#F5F7FA; --panel:#FFFFFF; --panel2:#F0F3F8; --border:#DCE2ED;
-  --text:#1A2233; --muted:#5C6B84; --faint:#8C97AB;
-  --imp:#C97D14; --exp:#1F9B82; --danger:#D6453D; --axis:#C3CEDE;
+  --text:#1A2233; --muted:#5C6B84; --faint:#636F86;
+  --imp:#A3620B; --exp:#167A66; --danger:#D6453D; --axis:#C3CEDE;
   --sticky-bg: rgba(245,247,250,.82);
   color-scheme:light;
 }
@@ -1180,6 +1180,76 @@ select:focus,input:focus{border-color:var(--exp)}
   .leaflet-popup-content{font-size:12px}
   .brand{gap:10px}
 }
+
+/* ===== index_154: mobil iyileştirmeleri ===== */
+:focus-visible{outline:2px solid var(--exp);outline-offset:2px}
+.firm-head:focus-visible{outline-offset:4px;border-radius:10px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}}
+.firm-dist.approx{color:var(--muted);font-family:'IBM Plex Sans',sans-serif}
+.firm-dist.sure .ic{width:.95em;height:.95em}
+.quick-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin:2px 0 14px}
+.quick-actions .qa{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:62px;margin:0;padding:8px 4px;
+  background:var(--panel2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:inherit;font-size:12.5px;font-weight:600;text-decoration:none;cursor:pointer;text-align:center;width:auto;opacity:1}
+.quick-actions .qa .ic{width:20px;height:20px;color:var(--exp)}
+.quick-actions .maps-link.qa{background:var(--exp);border-color:var(--exp);color:var(--bg)}
+.quick-actions .maps-link.qa .ic{color:var(--bg)}
+.quick-actions .visit-detail-btn.qa.visit-planned .ic{color:var(--imp)}
+.quick-actions .important-pin-toggle.qa .ic{color:#5B9FE8}
+.quick-actions .important-pin-toggle.qa.marked{background:rgba(91,159,232,.14);border-color:#5B9FE8}
+.map-chip-expand{display:none}
+.swipe-tip{display:none}
+.firm.is-hidden{opacity:.55;border-style:dashed}
+.firm.is-hidden.open{opacity:1}
+.hide-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:12.5px;color:var(--muted)}
+.hide-row[hidden]{display:none}
+.hide-row.is span{color:var(--imp)}
+.hide-btn{display:inline-flex;align-items:center;gap:6px;min-height:40px;background:none;border:none;color:var(--muted);font:500 13px 'IBM Plex Sans',sans-serif;cursor:pointer;padding:0 2px}
+.hide-row.is .hide-btn{border:1px solid var(--border);border-radius:9px;padding:0 14px;color:var(--text)}
+.hide-btn:hover{color:var(--danger)}
+.hide-reasons:not([hidden]){display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.hr-q{flex:1 1 100%;font-size:12.5px;color:var(--text);margin-bottom:2px}
+.hr-chip{min-height:40px;padding:0 14px;border-radius:20px;border:1px solid var(--border);background:var(--panel2);color:var(--text);font:500 13px 'IBM Plex Sans',sans-serif;cursor:pointer}
+.hr-chip:hover{border-color:var(--danger);color:var(--danger)}
+.hidden-note{display:block;width:100%;margin-top:12px;min-height:44px;background:none;border:1px dashed var(--border);border-radius:12px;color:var(--muted);font:500 13px 'IBM Plex Sans',sans-serif;cursor:pointer}
+.hidden-note[hidden]{display:none}
+.hidden-note b{color:var(--text)}
+@media(max-width:560px){
+  /* Liste önce: harita kısa, istenince büyür */
+  #map{height:190px!important;transition:height .25s ease}
+  .map-container-wrap.big #map{height:62vh!important}
+  .leaflet-control-zoom{display:none}
+  .map-chip-expand{display:flex;right:10px;bottom:10px;left:auto;top:auto}
+  .map-chip{min-height:40px}
+  /* Arama satırı kaydırınca üstte kalır */
+  .search-row{position:sticky;top:56px;z-index:1200;background:var(--bg);padding-block:8px;margin-block:-8px 4px}
+  .search-row input[type=search]{min-height:44px}
+  /* Sırala: yalnızca seçili ölçüt; Filtreler: ikon + sayı rozeti */
+  #sortToggleBtn{font-size:0;gap:6px;min-height:44px;padding-inline:12px}
+  #sortToggleBtn .sort-current{font-size:13.5px;color:var(--text)}
+  #sortToggleBtn .sort-current::before{content:"⇅ ";color:var(--exp)}
+  #filtersToggleBtn{font-size:0;width:48px;min-height:44px;padding:0;justify-content:center;position:relative;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2335C4A8' stroke-width='1.9' stroke-linecap='round'%3E%3Cpath d='M4 7h10M18 7h2M4 17h4M12 17h8'/%3E%3Ccircle cx='16' cy='7' r='2'/%3E%3Ccircle cx='10' cy='17' r='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;background-size:22px}
+  #filtersToggleBtn .filters-count{font-size:10.5px;position:absolute;top:-6px;right:-6px}
+  .filter-group[data-group="place"] > .fsel{flex:1 1 100%}
+  /* Okunabilir boyutlar (kartın ithalat/ihracat satırı olduğu gibi kalır) */
+  .firm-dist{font-size:12.5px}
+  .firm-loc{font-size:12.5px;font-family:'IBM Plex Sans',sans-serif;letter-spacing:.01em}
+  .badge-row .tim-badge,.badge-row .tq-badge{font-size:11.5px}
+  .new-badge{font-size:11.5px}
+  .det-label{font-size:11.5px}
+  .leaflet-control-attribution{font-size:10px!important}
+  /* Dokunma alanları en az 44 px */
+  .firm-top-right .important-pin-toggle{display:none}
+  .quick-actions{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .quick-actions .qa{font-size:11.5px}
+  .copy-btn{min-height:40px;padding:0 14px}
+  .profile-avatar{width:40px;height:40px}
+  .mobile-sticky-brand .msb-avatar{width:36px;height:36px}
+  #csvBtn{display:none}
+  .swipe-tip:not([hidden]){display:flex;align-items:flex-start;gap:10px;margin:0 0 10px;padding:10px 6px 10px 12px;border:1px dashed var(--border);border-radius:12px;font-size:12.5px;color:var(--muted)}
+  .swipe-tip b{color:var(--text)}
+  .swipe-tip button{flex:0 0 auto;margin-left:auto;width:36px;height:36px;border:none;background:none;color:var(--muted);font-size:14px;cursor:pointer;border-radius:8px}
+}
 </style>
 </head>
 <body>
@@ -1402,6 +1472,7 @@ select:focus,input:focus{border-color:var(--exp)}
   <div class="map-row">
     <div class="map-container-wrap">
       <div id="map"></div>
+      <button class="map-chip map-chip-expand" id="mapExpandChip" type="button" aria-expanded="false"><span id="mapExpandLbl">Haritayı büyüt</span></button>
       <div class="map-loading-overlay" id="mapLoadingOverlay" hidden>
         <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">
           <circle cx="22" cy="22" r="19" fill="none" stroke="var(--border)" stroke-width="1.2"/>
@@ -1447,7 +1518,7 @@ select:focus,input:focus{border-color:var(--exp)}
 <div class="search-row">
   <div class="search-box-wrap">
     <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
-    <input type="search" id="searchBox" placeholder="Firma ara…">
+    <input type="search" id="searchBox" placeholder="Firma veya VKN ara" aria-label="Firma veya VKN ara">
   </div>
   <div class="sort-wrap" id="sortWrap" hidden>
     <button class="filters-toggle-btn" id="sortToggleBtn" type="button" aria-haspopup="true" aria-expanded="false">Sırala <span class="sort-current" id="sortCurrent"></span></button>
@@ -1467,6 +1538,10 @@ select:focus,input:focus{border-color:var(--exp)}
     <div class="filter-group-label">Dönem</div>
     <select id="yearSel" title="Yıl / dönem"></select>
     <select id="monthSel" title="Ay"><option value="">Tüm aylar</option></select>
+  </div>
+  <div class="filter-group-sep"></div>
+  <div class="filter-group" data-group="place">
+    <div class="filter-group-label">Konum</div>
     <select id="ilSel" title="İl"><option value="">Tüm iller</option></select>
   </div>
   <div class="filter-group-sep"></div>
@@ -1475,6 +1550,11 @@ select:focus,input:focus{border-color:var(--exp)}
     <label class="chip chip-diib" id="diibChip"><input type="checkbox" id="diibOnly"> <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6"/></svg> DİİB</label>
     <label class="chip" id="timChip" style="display:none"><input type="checkbox" id="timOnly"> <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 01-10 0zM7 6H4a2 2 0 002 2M17 6h3a2 2 0 01-2 2"/></svg> İlk 1000</label>
     <label class="chip chip-tq" id="tqChip" style="display:none"><input type="checkbox" id="tqOnly"> <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M8.5 12.5L7 21l5-2.5L17 21l-1.5-8.5"/></svg> Turquality</label>
+  </div>
+  <div class="filter-group-sep"></div>
+  <div class="filter-group" data-group="hidden">
+    <div class="filter-group-label">Gizlenenler</div>
+    <label class="chip" id="showHiddenChip"><input type="checkbox" id="showHiddenChk"> Gizlediğim firmaları göster <span id="hiddenCnt"></span></label>
   </div>
   <select id="sortSel" title="Sırala" style="display:none">
     <option value="exp">İhracat ↓</option>
@@ -1511,8 +1591,10 @@ select:focus,input:focus{border-color:var(--exp)}
       <button class="btn" id="csvBtn">CSV indir</button>
     </div>
   </div>
+  <div class="swipe-tip" id="swipeTip" hidden><span><b>İpucu:</b> Kartı sağa kaydır, ziyaret listene eklensin. Sola kaydırırsan listeden çıkar.</span><button type="button" id="swipeTipClose" aria-label="İpucunu kapat">✕</button></div>
   <div class="firms" id="firmList"></div>
   <button class="btn showmore" id="showMore" style="display:none">Daha fazla göster</button>
+  <button type="button" class="hidden-note" id="hiddenNote" hidden></button>
 </div>
 
 <div class="empty" id="emptyState">
@@ -1970,6 +2052,7 @@ const S = {
   starred: {},       // { subeKullaniciAdi: { firmaKey: true, ... }, ... } — admin atar, buluttan yüklenir
   starredDirty: false,
   important: {},     // { subeKullaniciAdi: { firmaKey: true, ... }, ... } — şube kendi işaretler, buluttan yüklenir
+  hidden: {},        // { subeKullaniciAdi: { firmaKey: {ts, neden} } } — şubenin kendi listesinden gizlediği firmalar, buluttan yüklenir
   visits: {},        // { subeKullaniciAdi: { firmaKey: {status:"planned"|"done", ts:number} } } — şubenin ziyaret listesi
   loginLogs: {},     // { subeKullaniciAdi: [ts, ts, ...] } — buluttan yüklenir (yönetim panelinde)
   manualMerges: {},  // { kucukKey: buyukKey } — admin'in elle "aynı firma" işaretlediği eşleşmeler, buluttan yüklenir
@@ -2039,6 +2122,8 @@ const toast = (msg, opts) => {
    1.75px stroke, yuvarlak uçlar. .ic class'ı boyutu güncel font-size'a bağlar. */
 const SW = 'fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"';
 const ICONS = {
+  phone:       `<svg class="ic" viewBox="0 0 24 24" ${SW}><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1.9.4 1.8.7 2.7a2 2 0 01-.5 2.1L8 9.8a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.7.7a2 2 0 011.7 2z"/></svg>`,
+  copy:        `<svg class="ic" viewBox="0 0 24 24" ${SW}><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`,
   star:        `<svg class="ic" viewBox="0 0 24 24" ${SW}><path d="M12 2l2.9 6.9 7.1.6-5.5 4.8 1.7 7-6.2-3.9-6.2 3.9 1.7-7-5.5-4.8 7.1-.6z"/></svg>`,
   starFilled:  `<svg class="ic" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"><path d="M12 2l2.9 6.9 7.1.6-5.5 4.8 1.7 7-6.2-3.9-6.2 3.9 1.7-7-5.5-4.8 7.1-.6z"/></svg>`,
   pin:         `<svg class="ic" viewBox="0 0 24 24" ${SW}><path d="M12 21s-7-6.1-7-11a7 7 0 0114 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>`,
@@ -2823,8 +2908,13 @@ function filtered(){
   let list = aggregate();
   const q = trUp($("searchBox").value.trim());
   const il = $("ilSel").value;
-  if (q) list = list.filter(a=>trUp(a.firma).includes(q));
+  if (q) list = list.filter(a=>trUp(a.firma+" "+(a.vkn||"")+" "+(a.adres||"")).includes(q));
   if (il) list = list.filter(a=>a.il===il);
+  { // Şubenin kendi listesinden gizlediği firmalar (Ziyaret Listem görünümünde ve admin önizlemede uygulanmaz)
+    const hm = (S.hidden && S.hidden[ownDataUname()]) || {};
+    if (!S._visitView){ S._hiddenCount = list.filter(a=>hm[a.key]).length; if (!S._showHidden) list = list.filter(a=>!hm[a.key]); }
+    else S._hiddenCount = 0;
+  }
   if ($("diibOnly") && $("diibOnly").checked) list = list.filter(a=>a.belge>0);
   if ($("timOnly") && $("timOnly").checked) list = list.filter(a=>a.tim);
   if ($("tqOnly") && $("tqOnly").checked) list = list.filter(a=>a.tq);
@@ -3094,6 +3184,7 @@ function render(){
     <div class="stat-strip-sep"></div>
     <div class="stat-strip-item"><div class="k">İhracat</div><div class="v exp"><span class="n-full">${fmt$(tExp)}</span><span class="n-short">${fmtShort$(tExp)}</span></div></div>`;
   $("resultCount").textContent = `${list.length} firma · ${periodLabel()}`;
+  updateHiddenNote(); updateSwipeTip();
   // Mobil filtre çekmecesinin alt düğmesi: seçili filtrelerle kaç firma geleceğini gösterir
   const applyBtn = $("filtersApplyBtn");
   if (applyBtn) applyBtn.textContent = list.length ? `${list.length.toLocaleString("tr-TR")} firmayı göster` : "Sonuç yok";
@@ -3125,7 +3216,7 @@ function render(){
     const origin = S.userLoc ? `&origin=${S.userLoc.lat},${S.userLoc.lon}` : "";
     const mapsUrl = `https://www.google.com/maps/dir/?api=1${origin}&destination=${dest}`;
     const open = S._openFirm===a.key;
-    const div = document.createElement("div"); div.className="firm"+(open?" open":"");
+    const div = document.createElement("div"); const gizliKayit = ((S.hidden && S.hidden[ownDataUname()]) || {})[a.key]; div.className="firm"+(open?" open":"")+(gizliKayit?" is-hidden":"");
     div.dataset.key = a.key;
     const ownUname = ownDataUname();
     const isStarredForBranch = S.branch && S.starred[S.branch.username] && S.starred[S.branch.username][a.key];
@@ -3152,12 +3243,12 @@ function render(){
     const cardIlce = (a.tq && a.tq.ilce) ? trUp(a.tq.ilce) : (a.adres && a.il ? extractIlce(a.adres, a.il) : null);
     const nameParts = splitFirmName(a.firma);
     div.innerHTML = `
-      <div class="firm-head" data-toggle="${escH(a.key)}">
+      <div class="firm-head" data-toggle="${escH(a.key)}" role="button" tabindex="0" aria-expanded="${open}">
         <div class="firm-top"><div class="firm-name">${isStarredForBranch?`<span class="star-badge" title="Şubeniz için hedef firma">${ic('starFilled')}</span>`:""}${isImportantForBranch?`<span class="important-badge" title="Sizin işaretlediğiniz önemli firma">${ic('pin')}</span>`:""}${adminViewImportant?`<span class="important-badge" title="Bu şube tarafından önemli işaretlenmiş">${ic('pin')}</span>`:""}${visitRec?`<span class="visit-badge visit-${visitRec.status}" title="${visitLabel}">${visitIcon}</span>`:""}${escH(nameParts.main)}${nameParts.suffix?`<span class="nm-suffix">${escH(nameParts.suffix)}</span>`:""}${newBadgeHTML}${(a.tim||a.tq)?`<span class="badge-row">${a.tim?`<span class="tim-badge" title="TİM İlk 1000 İhracatçı${S.timYear?' '+S.timYear:''}">${ic('trophy')} İlk 1000${a.tim.r<9999?` · #${a.tim.r}`:''}</span>`:""}${a.tq?`<span class="tq-badge" title="${escH(a.tq.prog||'Turquality/Marka Destek')}">${ic('medal')} ${/TURQUALITY/i.test(a.tq.prog)?'Turquality':'Marka Destek'}</span>`:""}</span>`:""}</div>
           <div class="firm-top-right">
             ${ownUname?`<button class="important-pin-toggle${isImportantForBranch?" marked":""}" data-important-key="${escH(a.key)}" title="${isImportantForBranch?'Önemli işaretini kaldır':'Önemli olarak işaretle'}">${ic('pin')}</button>`:""}
             ${S._visitView&&visitRec?`<span class="firm-visit-state ${visitRec.status}">${visitRec.status==="done"?ic('checkCircle')+" Ziyaret edildi":ic('bookmark')+" Planlandı"} · ${fmtVisitDate(visitRec.ts)}</span>`:""}
-            ${d!==undefined?`<div class="firm-dist" title="${exact?'Tam adres':(precise?'Mahalle bazlı':'İlçe merkezine göre')}">≈ ${d<10?d.toFixed(1):Math.round(d)} km${exact?` <span class="prec exact">${ic('pin')}</span>`:(precise?' <span class="prec">•</span>':'')}</div>`:""}
+            ${d!==undefined?(()=>{ const km = d<10 ? d.toLocaleString("tr-TR",{maximumFractionDigits:1}) : Math.round(d).toLocaleString("tr-TR"); const ilceAd = cardIlce ? cardIlce.charAt(0)+cardIlce.slice(1).toLocaleLowerCase("tr-TR") : "İlçe"; return (exact||precise) ? `<div class="firm-dist sure" title="${exact?'Tam adrese göre':'Mahalleye göre'}">${ic('pin')} ${km} km</div>` : `<div class="firm-dist approx" title="Tam adres konumu yok; ilçe merkezine göre yaklaşık">${escH(ilceAd)} · ~${km} km</div>`; })():""}
           </div>
         </div>
         <div class="firm-addr">${a.adres?escH(a.adres): (a.tq?(a.tq.web?escH(a.tq.web):"Turquality kayıtlı firma"):(a.tim?"Adres yok — sadece İlk 1000 listesinde":"Adres yok"))}</div>
@@ -3400,7 +3491,7 @@ function enhanceFilterSelect(selectId, labelText, searchPlaceholder){
 function closeAllFsel(){ _fselList.forEach(f=>f.close()); }
 document.addEventListener("click", e=>{ if (!e.target.closest(".fsel")) closeAllFsel(); });
 document.addEventListener("keydown", e=>{ if (e.key==="Escape") closeAllFsel(); });
-enhanceFilterSelect("yearSel", "Dönem");
+enhanceFilterSelect("yearSel", "Yıl");
 enhanceFilterSelect("monthSel", "Ay");
 enhanceFilterSelect("ilSel", "İl", "İl ara…");
 
@@ -3426,12 +3517,19 @@ function firmDetailHTML(a, mapsUrl){
   else { visitBtnLabel = ic('checkCircle')+" Ziyaret edildi · Ziyaret Listeme Git"; visitBtnClass = " visit-done"; }
   // İlçe: Turquality kaydında varsa oradan, yoksa adres metninden çıkar
   const ilce = (a.tq && a.tq.ilce) ? trUp(a.tq.ilce) : (a.adres && a.il ? extractIlce(a.adres, a.il) : null);
+  const isImpQ = ownUnameDet && S.important[ownUnameDet] && S.important[ownUnameDet][a.key];
+  const qaVisit = !visitRec ? ic('bookmark')+"<span>Listeye ekle</span>" : (visitRec.status==="planned" ? ic('bookmark')+"<span>Planlandı</span>" : ic('checkCircle')+"<span>Ziyaret edildi</span>");
   return `<div class="firm-detail">
+    <div class="quick-actions">
+      <a class="maps-link qa" href="${escH(mapsUrl)}" target="_blank" rel="noopener">${ic('pin')}<span>Yol tarifi</span></a>
+      ${ownUnameDet?`<button class="visit-detail-btn qa${visitBtnClass}" data-visit-key="${escH(a.key)}"${visitRec?' data-visit-goto="1"':''}>${qaVisit}</button>`:""}
+      ${ownUnameDet?`<button class="important-pin-toggle qa${isImpQ?" marked":""}" data-important-key="${escH(a.key)}">${ic('pin')}<span>${isImpQ?"Önemli ✓":"Önemli"}</span></button>`:""}
+      ${a.tq&&a.tq.tel?`<a class="qa" href="tel:${escH(a.tq.tel.replace(/\s/g,''))}">${ic('phone')}<span>Ara</span></a>`:""}
+      ${a.vkn?`<button class="copy-btn qa" data-copy="${escH(a.vkn)}">${ic('copy')}<span>VKN kopyala</span></button>`:""}
+    </div>
     ${row("Vergi No (VKN)", a.vkn?escH(a.vkn):"<span class='muted'>Listede yok</span>", a.vkn||"", true)}
     ${row("Firma", escH(a.firma), a.firma)}
     ${a.adres?row("Adres", escH(a.adres), a.adres):""}
-    ${row("İl", a.il?escH(a.il):"—")}
-    ${ilce?row("İlçe", escH(ilce)):""}
     ${a.tim?row("İlk 1000 İhracatçı", `<span class='tim-inline'>${ic('trophy')} ${a.tim.r<9999?`Genel #${a.tim.r}`:'Listede'}${a.tim.s?` · Sektör #${a.tim.s}`:''}${S.timYear?` (${S.timYear})`:''}</span>`):""}
     ${a.tim&&a.tim.n?row("Sektör", escH(a.tim.n)):""}
     ${a.tim&&a.tim.e?row(`${S.timYear||'2025'} ihracatı (TİM)`, `<span class='tim-inline'>${fmtM(a.tim.e)}</span>`):""}
@@ -3448,12 +3546,15 @@ function firmDetailHTML(a, mapsUrl){
       <div class="det-value"><span class="count-badge">${escH(a.belge)} belge</span><span class="car">⌄</span></div>
     </button>
     <div class="belge-panel">${belgeListHTML(a)}</div>`:""}
-    ${d!==undefined?row("Yaklaşık mesafe", (d<10?d.toFixed(1):Math.round(d))+" km"):""}
-    <div class="det-actions">
-      <a class="maps-link" href="${escH(mapsUrl)}" target="_blank" rel="noopener">${ic('pin')} Yol tarifi</a>
-      ${a.vkn?`<button class="copy-btn wide" data-copy="${escH(a.vkn)}">VKN'yi kopyala</button>`:""}
-    </div>
-    ${ownUnameDet?`<button class="visit-detail-btn${visitBtnClass}" data-visit-key="${escH(a.key)}"${visitRec?' data-visit-goto="1"':''}>${visitBtnLabel}</button>`:""}
+    ${d!==undefined?row("Yaklaşık mesafe", (d<10?d.toLocaleString("tr-TR",{maximumFractionDigits:1}):Math.round(d).toLocaleString("tr-TR"))+" km"):""}
+    ${ownUnameDet ? (()=>{ const g = ((S.hidden && S.hidden[ownUnameDet]) || {})[a.key];
+      const hedef = S.branch && S.starred[S.branch.username] && S.starred[S.branch.username][a.key];
+      if (g) return `<div class="hide-row is"><span>Gizli · ${escH(g.neden||"")}</span><button type="button" class="hide-btn" data-unhide-key="${escH(a.key)}">Geri getir</button></div>`;
+      if (hedef) return `<div class="hide-row"><span class="muted">Yönetimin hedef firması; gizlenemez.</span></div>`;
+      const sor = S._hideAsk===a.key; // neden soruluyor: arka plandaki yenilemeler (konum inceltme) soruyu kapatmasın
+      return `<div class="hide-row"${sor?" hidden":""}><button type="button" class="hide-btn" data-hide-key="${escH(a.key)}">${ic('x')} Bu firmayı listemden gizle</button></div>
+        <div class="hide-reasons"${sor?"":" hidden"}><div class="hr-q">Neden gizliyorsun? Yönetim bu nedeni görür.</div>
+        ${HIDE_REASONS.map(n=>`<button type="button" class="hr-chip" data-hide-reason="${escH(n)}" data-key="${escH(a.key)}">${escH(n)}</button>`).join("")}</div>`; })() : ""}
   </div>`;
 }
 
@@ -3572,7 +3673,7 @@ $("firmList").addEventListener("click", e=>{
   const head = e.target.closest(".firm-head");
   if (head){
     const k = head.dataset.toggle;
-    S._openFirm = (S._openFirm===k) ? null : k;
+    S._openFirm = (S._openFirm===k) ? null : k; S._hideAsk = null;
     render();
   }
 });
@@ -3737,6 +3838,36 @@ function firmNameByKey(key){
   return a ? a.firma : "";
 }
 // Ziyaret kaydını olduğu gibi yaz (rec null ise listeden kaldır) — setVisitStatus ve "Geri al" bunu kullanır
+const HIDE_REASONS = ["Zaten müşterimiz","Başka şubenin müşterisi","İlgilenmiyor","Faaliyeti durmuş","Diğer"];
+// Firma gizleme: şube bir firmayı kendi ana listesinden çıkarır; neden yönetime görünür, geri alınabilir.
+async function writeHiddenRecord(firmKey, rec){
+  const uname = ownDataUname();
+  if (!uname) return;
+  const current = { ...((S.hidden && S.hidden[uname])||{}) };
+  if (rec) current[firmKey] = rec; else delete current[firmKey];
+  S.hidden = { ...(S.hidden||{}), [uname]: current };
+  render();
+  try{
+    await fbDB.ref("hidden/"+uname+"/"+firmKey).set(rec ? {ts: firebase.database.ServerValue.TIMESTAMP, neden: rec.neden} : null);
+  }catch(e){
+    toast("Gizleme kaydedilemedi: "+(e.message||e.code));
+  }
+}
+function updateHiddenNote(){
+  const n = S._hiddenCount || 0, note = $("hiddenNote");
+  if (note){
+    note.hidden = !n || !!S._visitView;
+    note.innerHTML = S._showHidden ? `Gizlenen ${n} firmayı tekrar sakla` : `<b>${n} firma</b> gizli · Göster`;
+  }
+  if ($("hiddenCnt")) $("hiddenCnt").textContent = n ? `(${n})` : "";
+  if ($("showHiddenChk")) $("showHiddenChk").checked = !!S._showHidden;
+}
+// Kartı kaydırma hareketi yalnızca şube/departman kullanıcısında var; ipucu bir kez kapatılınca bir daha çıkmaz
+function updateSwipeTip(){
+  const tip = $("swipeTip"); if (!tip) return;
+  let kapali = false; try{ kapali = localStorage.getItem("dtr-swipe-tip")==="1"; }catch(e){}
+  tip.hidden = kapali || !ownDataUname() || !!S._visitView;
+}
 async function writeVisitRecord(firmKey, rec){
   const uname = ownDataUname();
   if (!uname) return;
@@ -3809,7 +3940,7 @@ function renderVisitListScreen(){
 }
 
 function copyText(text, btn){
-  const done = ()=>{ if(btn){ const o=btn.textContent; btn.textContent="Kopyalandı ✓"; btn.classList.add("ok"); setTimeout(()=>{btn.textContent=o; btn.classList.remove("ok");},1500);} };
+  const done = ()=>{ if(btn){ const o=btn.innerHTML; btn.textContent="Kopyalandı ✓"; btn.classList.add("ok"); setTimeout(()=>{btn.innerHTML=o; btn.classList.remove("ok");},1500);} };
   if (navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
   } else fallbackCopy(text,done);
@@ -6060,7 +6191,7 @@ function detachCloud(){
   S._canliVeri = false;
   S._hamAylar = S._hamTim = S._hamTq = S._hamMeta = undefined;
   S.files = S.files.filter(f=>f.dirty);
-  S.starred = {}; S.important = {}; S.visits = {}; S.loginLogs = {};
+  S.starred = {}; S.important = {}; S.visits = {}; S.hidden = {}; S._showHidden = false; S.loginLogs = {};
 }
 /* ================= ORTAK VERİ İŞLEYİCİLERİ =================
    Aylar / TİM / Turquality / konumlar nereden gelirse gelsin (canlı dinleyici, telefondaki önbellek ya da
@@ -6279,10 +6410,12 @@ function loadCloud(){
     // "starred" (yıldız) sadece admin'in gerçek şubelere atadığı hedefler — departman hesabında yok
     cloudOn("starred/"+uname, snap=>{ if (!S.starredDirty){ S.starred = {[uname]: snap.val() || {}}; render(); } });
     cloudOn("important/"+uname, snap=>{ S.important = {[uname]: snap.val() || {}}; render(); });
+    cloudOn("hidden/"+uname, snap=>{ S.hidden = {[uname]: snap.val() || {}}; render(); });
     cloudOn("visits/"+uname, snap=>{ S.visits = {[uname]: snap.val() || {}}; render(); if (!$("visitListScreen").hidden) renderVisitListScreen(); });
   } else if (S.isGroupUser && uname){
     // Departman kullanıcısı: kendi "önemli"+"ziyaret" verisi, önizlediği şubeyle karışmaz
     cloudOn("important/"+uname, snap=>{ S.important = {[uname]: snap.val() || {}}; render(); });
+    cloudOn("hidden/"+uname, snap=>{ S.hidden = {[uname]: snap.val() || {}}; render(); });
     cloudOn("visits/"+uname, snap=>{ S.visits = {[uname]: snap.val() || {}}; render(); if (!$("visitListScreen").hidden) renderVisitListScreen(); });
   }
   // Admin'in elle birleştirdiği firma eşleşmelerini buluttan yükle (sadece admin yazar)
@@ -6354,6 +6487,39 @@ $("saveTqBtn").onclick = async ()=>{
 document.addEventListener("change", e=>{ if(e.target && (e.target.id==="diibOnly"||e.target.id==="timOnly"||e.target.id==="tqOnly")){ S.shown=50; render(); } });
 
 // Başlat
+
+// ---- Mobil iyileştirmeleri: klavyeyle kart açma, harita büyüt, ipucu, firma gizleme ----
+(function(){
+  document.addEventListener("keydown", e=>{
+    const h = e.target.closest && e.target.closest(".firm-head");
+    if (h && e.target===h && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); h.click(); }
+  });
+  const chip = $("mapExpandChip");
+  if (chip) chip.addEventListener("click", e=>{
+    e.stopPropagation();
+    const w = chip.closest(".map-container-wrap"); const big = !w.classList.contains("big");
+    w.classList.toggle("big", big); chip.setAttribute("aria-expanded", big);
+    $("mapExpandLbl").textContent = big ? "Haritayı küçült" : "Haritayı büyüt";
+    setTimeout(()=>{ try{ S.map && S.map.invalidateSize(); }catch(_){} }, 280);
+  });
+  const x = $("swipeTipClose");
+  if (x) x.addEventListener("click", ()=>{ $("swipeTip").hidden = true; try{ localStorage.setItem("dtr-swipe-tip","1"); }catch(_){} });
+  $("firmList").addEventListener("click", e=>{
+    const hb = e.target.closest("[data-hide-key]");
+    if (hb){ e.stopPropagation(); S._hideAsk = hb.dataset.hideKey; render(); return; }
+    const rc = e.target.closest("[data-hide-reason]");
+    if (rc){ e.stopPropagation(); const key = rc.dataset.key, ad = firmNameByKey(key);
+      S._openFirm = null; S._hideAsk = null;
+      writeHiddenRecord(key, {neden: rc.dataset.hideReason});
+      toast("Firma gizlendi", {sub: ad ? String(ad).slice(0,42) : "", undo: ()=>writeHiddenRecord(key, null)}); return; }
+    const ub = e.target.closest("[data-unhide-key]");
+    if (ub){ e.stopPropagation(); writeHiddenRecord(ub.dataset.unhideKey, null); toast("Firma tekrar listende"); }
+  });
+  const gosterAyarla = v => { S._showHidden = v; render(); };
+  $("showHiddenChk").addEventListener("change", e=>gosterAyarla(e.target.checked));
+  $("hiddenNote").addEventListener("click", ()=>gosterAyarla(!S._showHidden));
+})();
+
 if (window.firebase && firebaseConfig.apiKey){ initFirebase(); }
 else { setEmptyState("Firebase yüklenemedi.", false); hideInitialLoadOverlay(); }
 // Güvenlik ağı: her ne sebeple olursa olsun 10sn içinde karar verilemezse yükleme ekranında takılı kalınmasın

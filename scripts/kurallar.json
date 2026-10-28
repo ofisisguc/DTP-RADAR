@@ -23,6 +23,16 @@
         ".write": "auth != null && auth.token.u === $u && (auth.token.rol === 'sube' || auth.token.rol === 'grup')"
       }
     },
+    "hidden": {
+      ".read": "auth != null && auth.token.rol === 'admin'",
+      "$u": {
+        ".read": "auth != null && auth.token.u === $u",
+        ".write": "auth != null && auth.token.u === $u && (auth.token.rol === 'sube' || auth.token.rol === 'grup')",
+        "$firma": {
+          ".validate": "newData.hasChildren(['ts', 'neden']) && newData.child('neden').isString() && newData.child('neden').val().length <= 40"
+        }
+      }
+    },
     "visits": {
       ".read": "auth != null && auth.token.rol === 'admin'",
       "$u": {
